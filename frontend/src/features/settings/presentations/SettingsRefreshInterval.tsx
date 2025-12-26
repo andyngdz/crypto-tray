@@ -1,4 +1,4 @@
-import { Select, SelectItem } from '@heroui/react'
+import { Label, ListBox, Select } from '@heroui/react'
 import { REFRESH_OPTIONS } from '../constants/refreshOptions'
 import { useSettingsRefreshInterval } from '../states/useSettingsRefreshInterval'
 
@@ -7,14 +7,30 @@ export function SettingsRefreshInterval() {
 
   return (
     <Select
-      label="Refresh Interval"
+      className="w-full"
       placeholder="Select interval"
-      selectedKeys={[String(refreshSeconds)]}
-      onSelectionChange={onChange}
+      value={String(refreshSeconds)}
+      onChange={onChange}
     >
-      {REFRESH_OPTIONS.map((opt) => (
-        <SelectItem key={String(opt.value)}>{opt.label}</SelectItem>
-      ))}
+      <Label>Refresh Interval</Label>
+      <Select.Trigger>
+        <Select.Value />
+        <Select.Indicator />
+      </Select.Trigger>
+      <Select.Popover>
+        <ListBox>
+          {REFRESH_OPTIONS.map((opt) => (
+            <ListBox.Item
+              key={String(opt.value)}
+              id={String(opt.value)}
+              textValue={opt.label}
+            >
+              {opt.label}
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+          ))}
+        </ListBox>
+      </Select.Popover>
     </Select>
   )
 }

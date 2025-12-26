@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { SharedSelection } from '@heroui/react'
+import type { Key } from '@heroui/react'
 import type { ProviderInfo } from '../types'
 import { useConfig } from './useConfig'
 
@@ -7,7 +7,7 @@ export interface UseSettingsProviderReturn {
   providerId: string
   providers: ProviderInfo[]
   currentProvider?: ProviderInfo
-  onChange: (keys: SharedSelection) => void
+  onChange: (value: Key | null) => void
 }
 
 export function useSettingsProvider(): UseSettingsProviderReturn {
@@ -20,9 +20,7 @@ export function useSettingsProvider(): UseSettingsProviderReturn {
     [providers, providerId]
   )
 
-  const onChange = (keys: SharedSelection) => {
-    if (keys === 'all') return
-    const value = Array.from(keys)[0]
+  const onChange = (value: Key | null) => {
     if (value) {
       updateConfig({ provider_id: String(value) })
     }

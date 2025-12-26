@@ -1,4 +1,4 @@
-import { Select, SelectItem } from '@heroui/react'
+import { Label, ListBox, Select } from '@heroui/react'
 import { useSettingsProvider } from '../states/useSettingsProvider'
 
 export function SettingsProvider() {
@@ -6,14 +6,26 @@ export function SettingsProvider() {
 
   return (
     <Select
-      label="API Provider"
+      className="w-full"
       placeholder="Select a provider"
-      selectedKeys={[providerId]}
-      onSelectionChange={onChange}
+      value={providerId}
+      onChange={onChange}
     >
-      {providers.map((p) => (
-        <SelectItem key={p.id}>{p.name}</SelectItem>
-      ))}
+      <Label>API Provider</Label>
+      <Select.Trigger>
+        <Select.Value />
+        <Select.Indicator />
+      </Select.Trigger>
+      <Select.Popover>
+        <ListBox>
+          {providers.map((p) => (
+            <ListBox.Item key={p.id} id={p.id} textValue={p.name}>
+              {p.name}
+              <ListBox.ItemIndicator />
+            </ListBox.Item>
+          ))}
+        </ListBox>
+      </Select.Popover>
     </Select>
   )
 }

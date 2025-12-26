@@ -1,10 +1,4 @@
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Divider,
-} from '@heroui/react'
+import { Button } from '@heroui/react'
 import { hideWindow } from '../services/configService'
 import { useConfig } from '../states/useConfig'
 import { useSettingsProvider } from '../states/useSettingsProvider'
@@ -17,40 +11,26 @@ export function SettingsView() {
   const { currentProvider } = useSettingsProvider()
 
   return (
-    <div className="min-h-screen p-6 bg-background">
-      <Card className="max-w-md mx-auto">
-        <CardHeader className="flex flex-col items-start gap-1">
-          <h1 className="text-xl font-bold">Crypto Tray Settings</h1>
-          <p className="text-small text-default-500">
-            Configure your price tracker
-          </p>
-        </CardHeader>
-        <Divider />
-        <CardBody className="gap-4">
-          {error && (
-            <div className="p-3 text-sm text-white bg-danger rounded-lg">
-              {error}
-            </div>
-          )}
+    <div className="p-6 min-h-screen flex flex-col gap-4">
+      {error && (
+        <div className="p-3 text-sm text-white bg-danger rounded-lg">
+          {error}
+        </div>
+      )}
 
-          <SettingsProvider />
+      <SettingsProvider />
 
-          {currentProvider?.requiresApiKey && <SettingsApiKey />}
+      {currentProvider?.requiresApiKey && <SettingsApiKey />}
 
-          <SettingsRefreshInterval />
+      <SettingsRefreshInterval />
 
-          <Divider className="my-2" />
-
-          <Button
-            color="primary"
-            className="w-full"
-            onPress={hideWindow}
-            isLoading={saving}
-          >
-            {saving ? 'Saving...' : 'Close'}
-          </Button>
-        </CardBody>
-      </Card>
+      <Button
+        className="w-full mt-auto"
+        onPress={hideWindow}
+        isDisabled={saving}
+      >
+        {saving ? 'Saving...' : 'Close'}
+      </Button>
     </div>
   )
 }

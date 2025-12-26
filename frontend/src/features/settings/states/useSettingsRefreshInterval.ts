@@ -1,9 +1,9 @@
-import type { SharedSelection } from '@heroui/react'
+import type { Key } from '@heroui/react'
 import { useConfig } from './useConfig'
 
 export interface UseSettingsRefreshIntervalReturn {
   refreshSeconds: number
-  onChange: (keys: SharedSelection) => void
+  onChange: (value: Key | null) => void
 }
 
 export function useSettingsRefreshInterval(): UseSettingsRefreshIntervalReturn {
@@ -11,9 +11,7 @@ export function useSettingsRefreshInterval(): UseSettingsRefreshIntervalReturn {
 
   const refreshSeconds = config?.refresh_seconds ?? 0
 
-  const onChange = (keys: SharedSelection) => {
-    if (keys === 'all') return
-    const value = Array.from(keys)[0]
+  const onChange = (value: Key | null) => {
     if (value) {
       updateConfig({ refresh_seconds: Number(value) })
     }
