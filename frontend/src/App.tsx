@@ -1,7 +1,7 @@
-import { Settings } from './components/Settings';
+import { Settings } from './features/settings'
 
 function App() {
-  return <Settings />;
+  return <Settings />
 }
 
-export default App;
+export default App
