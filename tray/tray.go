@@ -4,6 +4,8 @@ import (
 	_ "embed"
 	"fmt"
 
+	"crypto-tray/services"
+
 	"github.com/getlantern/systray"
 )
 
@@ -93,7 +95,7 @@ func (t *Manager) onExit() {
 
 // UpdatePrice updates the tray display with new price data
 func (t *Manager) UpdatePrice(symbol string, price float64) {
-	displayText := fmt.Sprintf("%s $%.0f", symbol, price)
+	displayText := fmt.Sprintf("%s %s", symbol, services.FormatPrice(price))
 	systray.SetTitle(displayText)
 	systray.SetTooltip(fmt.Sprintf("Crypto Tray - %s", displayText))
 
