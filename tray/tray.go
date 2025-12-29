@@ -73,13 +73,9 @@ func (t *Manager) onReady() {
 		for {
 			select {
 			case <-settingsItem.ClickedCh:
-				if t.onOpenSettings != nil {
-					t.onOpenSettings()
-				}
+				t.onOpenSettings()
 			case <-refreshItem.ClickedCh:
-				if t.onRefreshNow != nil {
-					t.onRefreshNow()
-				}
+				t.onRefreshNow()
 			case <-quitItem.ClickedCh:
 				systray.Quit()
 			}
@@ -88,9 +84,7 @@ func (t *Manager) onReady() {
 }
 
 func (t *Manager) onExit() {
-	if t.onQuit != nil {
-		t.onQuit()
-	}
+	t.onQuit()
 }
 
 // UpdatePrice updates the tray display with new price data
@@ -98,19 +92,14 @@ func (t *Manager) UpdatePrice(symbol string, price float64) {
 	displayText := fmt.Sprintf("%s %s", symbol, services.FormatPrice(price))
 	systray.SetTitle(displayText)
 	systray.SetTooltip(fmt.Sprintf("Crypto Tray - %s", displayText))
-
-	if t.priceItem != nil {
-		t.priceItem.SetTitle(displayText)
-	}
+	t.priceItem.SetTitle(displayText)
 }
 
 // SetError updates tray to show error state
 func (t *Manager) SetError(msg string) {
 	systray.SetTitle(fmt.Sprintf("%s $???", t.currentSymbol))
 	systray.SetTooltip("Error: " + msg)
-	if t.priceItem != nil {
-		t.priceItem.SetTitle("Error fetching price")
-	}
+	t.priceItem.SetTitle("Error fetching price")
 }
 
 // SetLoading shows loading state
