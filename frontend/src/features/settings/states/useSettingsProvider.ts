@@ -1,7 +1,7 @@
-import { useMemo } from 'react'
+import { useConfig } from '@/features/settings/states/useConfig'
+import type { ProviderInfo } from '@/features/settings/types'
 import type { Key } from '@heroui/react'
-import type { ProviderInfo } from '../types'
-import { useConfig } from './useConfig'
+import { useMemo } from 'react'
 
 export interface UseSettingsProviderReturn {
   providerId: string

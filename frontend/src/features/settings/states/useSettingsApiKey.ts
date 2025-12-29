@@ -1,4 +1,4 @@
-import { useConfig } from './useConfig'
+import { useConfig } from '@/features/settings/states/useConfig'
 
 export interface UseSettingsApiKeyReturn {
   value: string

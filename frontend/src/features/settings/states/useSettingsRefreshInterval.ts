@@ -1,5 +1,5 @@
+import { useConfig } from '@/features/settings/states/useConfig'
 import type { Key } from '@heroui/react'
-import { useConfig } from './useConfig'
 
 export interface UseSettingsRefreshIntervalReturn {
   refreshSeconds: number

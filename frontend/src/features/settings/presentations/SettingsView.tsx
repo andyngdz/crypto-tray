@@ -1,10 +1,10 @@
+import { SettingsApiKey } from '@/features/settings/presentations/SettingsApiKey'
+import { SettingsProvider } from '@/features/settings/presentations/SettingsProvider'
+import { SettingsRefreshInterval } from '@/features/settings/presentations/SettingsRefreshInterval'
+import { hideWindow } from '@/features/settings/services/configService'
+import { useConfig } from '@/features/settings/states/useConfig'
+import { useSettingsProvider } from '@/features/settings/states/useSettingsProvider'
 import { Button } from '@heroui/react'
-import { hideWindow } from '../services/configService'
-import { useConfig } from '../states/useConfig'
-import { useSettingsProvider } from '../states/useSettingsProvider'
-import { SettingsApiKey } from './SettingsApiKey'
-import { SettingsProvider } from './SettingsProvider'
-import { SettingsRefreshInterval } from './SettingsRefreshInterval'
 
 export function SettingsView() {
   const { saving, error } = useConfig()

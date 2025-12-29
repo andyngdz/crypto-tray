@@ -1,11 +1,11 @@
+import type { Config, ProviderInfo } from '@/features/settings/types'
+import { isConfig, isProviderInfo } from '@/features/settings/types'
 import {
   GetAvailableProviders,
   GetConfig,
   HideWindow,
   SaveConfig,
-} from '../../../../wailsjs/go/main/App'
-import type { Config, ProviderInfo } from '../types'
-import { isConfig, isProviderInfo } from '../types'
+} from '@wailsjs/go/main/App'
 
 /**
  * Fetches the current configuration from the Go backend

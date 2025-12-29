@@ -1,6 +1,6 @@
-import { useConfig } from '../states/useConfig'
-import { SettingsView } from './SettingsView'
-import { StatusDisplay } from './StatusDisplay'
+import { SettingsView } from '@/features/settings/presentations/SettingsView'
+import { StatusDisplay } from '@/features/settings/presentations/StatusDisplay'
+import { useConfig } from '@/features/settings/states/useConfig'
 
 export function Settings() {
   const { config, loading } = useConfig()

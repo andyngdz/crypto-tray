@@ -1,4 +1,4 @@
-import { Settings } from './features/settings'
+import { Settings } from '@/features/settings'
 
 function App() {
   return <Settings />

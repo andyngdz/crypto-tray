@@ -1,5 +1,5 @@
+import { useSettingsProvider } from '@/features/settings/states/useSettingsProvider'
 import { Label, ListBox, Select } from '@heroui/react'
-import { useSettingsProvider } from '../states/useSettingsProvider'
 
 export function SettingsProvider() {
   const { providerId, providers, onChange } = useSettingsProvider()

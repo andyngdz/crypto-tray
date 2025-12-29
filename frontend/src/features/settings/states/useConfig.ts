@@ -1,10 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   fetchConfig,
   fetchProviders,
   saveConfig,
-} from '../services/configService'
-import type { Config } from '../types'
+} from '@/features/settings/services/configService'
+import type { Config } from '@/features/settings/types'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 const QUERY_KEYS = {
   config: ['config'] as const,

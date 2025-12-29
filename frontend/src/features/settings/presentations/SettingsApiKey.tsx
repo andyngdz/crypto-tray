@@ -1,5 +1,5 @@
 import { Input, Label, TextField } from '@heroui/react'
-import { useSettingsApiKey } from '../states/useSettingsApiKey'
+import { useSettingsApiKey } from '@/features/settings/states/useSettingsApiKey'
 
 export function SettingsApiKey() {
   const { value, onChange } = useSettingsApiKey()

@@ -1,6 +1,6 @@
+import { REFRESH_OPTIONS } from '@/features/settings/constants/refreshOptions'
+import { useSettingsRefreshInterval } from '@/features/settings/states/useSettingsRefreshInterval'
 import { Label, ListBox, Select } from '@heroui/react'
-import { REFRESH_OPTIONS } from '../constants/refreshOptions'
-import { useSettingsRefreshInterval } from '../states/useSettingsRefreshInterval'
 
 export function SettingsRefreshInterval() {
   const { refreshSeconds, onChange } = useSettingsRefreshInterval()
