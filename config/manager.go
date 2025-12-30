@@ -2,44 +2,10 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
 )
-
-// Configuration constants
-const (
-	MinRefreshSeconds     = 10
-	MaxRefreshSeconds     = 3600
-	DefaultRefreshSeconds = 30
-	DefaultSymbol         = "BTC"
-	DefaultProviderID     = "coingecko"
-	configFileName        = "config.json"
-	appDirName            = "crypto-tray"
-)
-
-// Config holds the application configuration
-type Config struct {
-	ProviderID     string            `json:"provider_id"`
-	APIKeys        map[string]string `json:"api_keys"`
-	RefreshSeconds int               `json:"refresh_seconds"`
-	Symbols        []string          `json:"symbols"`
-}
-
-// Validate checks if the configuration is valid
-func (c *Config) Validate() error {
-	if c.RefreshSeconds < MinRefreshSeconds || c.RefreshSeconds > MaxRefreshSeconds {
-		return fmt.Errorf("refresh_seconds must be between %d and %d", MinRefreshSeconds, MaxRefreshSeconds)
-	}
-	if len(c.Symbols) == 0 {
-		return fmt.Errorf("at least one symbol is required")
-	}
-	if c.ProviderID == "" {
-		return fmt.Errorf("provider_id is required")
-	}
-	return nil
-}
 
 // Manager handles configuration persistence
 type Manager struct {
@@ -71,15 +37,6 @@ func NewManager() (*Manager, error) {
 	}
 
 	return m, nil
-}
-
-func defaultConfig() *Config {
-	return &Config{
-		ProviderID:     DefaultProviderID,
-		APIKeys:        make(map[string]string),
-		RefreshSeconds: DefaultRefreshSeconds,
-		Symbols:        []string{DefaultSymbol},
-	}
 }
 
 // Load reads configuration from disk
