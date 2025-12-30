@@ -30,16 +30,27 @@ func NewCoinGecko() *CoinGecko {
 	}
 }
 
-func (c *CoinGecko) ID() string   { return "coingecko" }
-func (c *CoinGecko) Name() string { return "CoinGecko" }
+func (c *CoinGecko) ID() string           { return "coingecko" }
+func (c *CoinGecko) Name() string         { return "CoinGecko" }
+func (c *CoinGecko) RequiresAPIKey() bool { return false }
+func (c *CoinGecko) SetAPIKey(key string) { c.apiKey = key }
 
-func (c *CoinGecko) FetchPrice(ctx context.Context, symbol string) (*PriceData, error) {
-	coinID := symbolToCoinID(symbol)
+// FetchPrices retrieves prices for multiple cryptocurrencies in a single API call
+func (c *CoinGecko) FetchPrices(ctx context.Context, symbols []string) ([]*PriceData, error) {
+	if len(symbols) == 0 {
+		return []*PriceData{}, nil
+	}
 
+	coinIDs := make([]string, 0, len(symbols))
+	for _, symbol := range symbols {
+		coinIDs = append(coinIDs, symbolToCoinID(symbol))
+	}
+
+	ids := strings.Join(coinIDs, ",")
 	url := fmt.Sprintf(
 		"%s/simple/price?ids=%s&vs_currencies=%s&include_24hr_change=true",
 		coingeckoBaseURL,
-		coinID,
+		ids,
 		coingeckoCurrency,
 	)
 
@@ -48,7 +59,6 @@ func (c *CoinGecko) FetchPrice(ctx context.Context, symbol string) (*PriceData, 
 		return nil, err
 	}
 
-	// Add API key header if available (for higher rate limits)
 	if c.apiKey != "" {
 		req.Header.Set(coingeckoAPIKeyHeader, c.apiKey)
 	}
@@ -72,20 +82,43 @@ func (c *CoinGecko) FetchPrice(ctx context.Context, symbol string) (*PriceData, 
 		return nil, err
 	}
 
-	data, ok := result[coinID]
-	if !ok {
-		return nil, fmt.Errorf("no data for %s", symbol)
+	prices := make([]*PriceData, 0, len(symbols))
+	for _, symbol := range symbols {
+		coinID := symbolToCoinID(symbol)
+		data, ok := result[coinID]
+		if !ok {
+			continue
+		}
+
+		prices = append(prices, &PriceData{
+			Symbol:    symbol,
+			Price:     data.USD,
+			Change24h: data.USDChange24,
+		})
 	}
 
-	return &PriceData{
-		Symbol:    symbol,
-		Price:     data.USD,
-		Change24h: data.USDChange24,
-	}, nil
+	return prices, nil
 }
 
-func (c *CoinGecko) RequiresAPIKey() bool { return false }
-func (c *CoinGecko) SetAPIKey(key string) { c.apiKey = key }
+// GetSupportedSymbols returns list of supported cryptocurrencies
+func (c *CoinGecko) GetSupportedSymbols() []SymbolInfo {
+	return []SymbolInfo{
+		{ID: "BTC", Name: "Bitcoin"},
+		{ID: "ETH", Name: "Ethereum"},
+		{ID: "SOL", Name: "Solana"},
+		{ID: "ADA", Name: "Cardano"},
+		{ID: "DOT", Name: "Polkadot"},
+		{ID: "LINK", Name: "Chainlink"},
+		{ID: "AVAX", Name: "Avalanche"},
+		{ID: "MATIC", Name: "Polygon"},
+		{ID: "ATOM", Name: "Cosmos"},
+		{ID: "XRP", Name: "Ripple"},
+		{ID: "USDT", Name: "Tether"},
+		{ID: "USDC", Name: "USD Coin"},
+		{ID: "BNB", Name: "BNB"},
+		{ID: "DOGE", Name: "Dogecoin"},
+	}
+}
 
 // symbolToCoinID maps common symbols to CoinGecko coin IDs
 func symbolToCoinID(symbol string) string {

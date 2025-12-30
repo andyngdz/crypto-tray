@@ -6,6 +6,10 @@ export function GetAvailableProviders() {
   return window['go']['main']['App']['GetAvailableProviders']();
 }
 
+export function GetAvailableSymbols() {
+  return window['go']['main']['App']['GetAvailableSymbols']();
+}
+
 export function GetConfig() {
   return window['go']['main']['App']['GetConfig']();
 }

@@ -33,7 +33,7 @@ func main() {
 	// Create tray manager
 	var fetcher *price.Fetcher
 	trayManager := tray.New(
-		cfg.Symbol,
+		cfg.Symbols,
 		deps.App.ShowWindow,
 		func() { // onRefreshNow
 			if fetcher != nil {
@@ -47,14 +47,14 @@ func main() {
 	)
 
 	// Create price fetcher
-	fetcher = price.NewFetcher(deps.Registry, deps.ConfigManager, func(data *providers.PriceData, err error) {
+	fetcher = price.NewFetcher(deps.Registry, deps.ConfigManager, func(data []*providers.PriceData, err error) {
 		if err != nil {
 			log.Printf("Error fetching price: %v", err)
 			trayManager.SetError(err.Error())
 			return
 		}
-		if data != nil {
-			trayManager.UpdatePrice(data.Symbol, data.Price)
+		if len(data) > 0 {
+			trayManager.UpdatePrices(data)
 		}
 	})
 

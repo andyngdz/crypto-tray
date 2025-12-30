@@ -87,6 +87,16 @@ func (a *App) GetAvailableProviders() []ProviderInfo {
 	return result
 }
 
+// GetAvailableSymbols returns list of supported cryptocurrency symbols
+func (a *App) GetAvailableSymbols() []providers.SymbolInfo {
+	cfg := a.configManager.Get()
+	provider, ok := a.registry.Get(cfg.ProviderID)
+	if !ok {
+		return []providers.SymbolInfo{}
+	}
+	return provider.GetSupportedSymbols()
+}
+
 // HideWindow hides the settings window
 func (a *App) HideWindow() {
 	runtime.WindowHide(a.ctx)

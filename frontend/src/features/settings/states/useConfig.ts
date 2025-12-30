@@ -1,4 +1,5 @@
 import {
+  fetchAvailableSymbols,
   fetchConfig,
   fetchProviders,
   saveConfig,
@@ -9,6 +10,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 const QUERY_KEYS = {
   config: ['config'] as const,
   providers: ['providers'] as const,
+  symbols: ['symbols'] as const,
 }
 
 export function useConfig() {
@@ -22,6 +24,11 @@ export function useConfig() {
   const providersQuery = useQuery({
     queryKey: QUERY_KEYS.providers,
     queryFn: fetchProviders,
+  })
+
+  const symbolsQuery = useQuery({
+    queryKey: QUERY_KEYS.symbols,
+    queryFn: fetchAvailableSymbols,
   })
 
   const saveMutation = useMutation({
@@ -45,15 +52,17 @@ export function useConfig() {
     saveMutation.mutate({ ...currentConfig, ...updates })
   }
 
-  const loading = configQuery.isLoading || providersQuery.isLoading
+  const loading = configQuery.isLoading || providersQuery.isLoading || symbolsQuery.isLoading
   const error =
     configQuery.error?.message ||
     providersQuery.error?.message ||
+    symbolsQuery.error?.message ||
     saveMutation.error?.message
 
   return {
     config: configQuery.data,
     providers: providersQuery.data ?? [],
+    availableSymbols: symbolsQuery.data ?? [],
     loading,
     saving: saveMutation.isPending,
     error,

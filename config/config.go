@@ -24,7 +24,7 @@ type Config struct {
 	ProviderID     string            `json:"provider_id"`
 	APIKeys        map[string]string `json:"api_keys"`
 	RefreshSeconds int               `json:"refresh_seconds"`
-	Symbol         string            `json:"symbol"`
+	Symbols        []string          `json:"symbols"`
 }
 
 // Validate checks if the configuration is valid
@@ -32,8 +32,8 @@ func (c *Config) Validate() error {
 	if c.RefreshSeconds < MinRefreshSeconds || c.RefreshSeconds > MaxRefreshSeconds {
 		return fmt.Errorf("refresh_seconds must be between %d and %d", MinRefreshSeconds, MaxRefreshSeconds)
 	}
-	if c.Symbol == "" {
-		return fmt.Errorf("symbol is required")
+	if len(c.Symbols) == 0 {
+		return fmt.Errorf("at least one symbol is required")
 	}
 	if c.ProviderID == "" {
 		return fmt.Errorf("provider_id is required")
@@ -78,7 +78,7 @@ func defaultConfig() *Config {
 		ProviderID:     DefaultProviderID,
 		APIKeys:        make(map[string]string),
 		RefreshSeconds: DefaultRefreshSeconds,
-		Symbol:         DefaultSymbol,
+		Symbols:        []string{DefaultSymbol},
 	}
 }
 
@@ -92,7 +92,11 @@ func (m *Manager) Load() error {
 		return err
 	}
 
-	return json.Unmarshal(data, m.config)
+	if err := json.Unmarshal(data, m.config); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Save writes configuration to disk
