@@ -1,7 +1,8 @@
-import type { Config, ProviderInfo } from '@/features/settings/types'
-import { isConfig, isProviderInfo } from '@/features/settings/types'
+import type { Config, ProviderInfo, SymbolInfo } from '@/features/settings/types'
+import { isConfig, isProviderInfo, isSymbolInfo } from '@/features/settings/types'
 import {
   GetAvailableProviders,
+  GetAvailableSymbols,
   GetConfig,
   HideWindow,
   SaveConfig,
@@ -34,6 +35,17 @@ export async function fetchProviders(): Promise<ProviderInfo[]> {
  */
 export async function saveConfig(config: Config): Promise<void> {
   await SaveConfig(config)
+}
+
+/**
+ * Fetches the list of available cryptocurrency symbols
+ */
+export async function fetchAvailableSymbols(): Promise<SymbolInfo[]> {
+  const symbols = await GetAvailableSymbols()
+  if (!Array.isArray(symbols) || !symbols.every(isSymbolInfo)) {
+    throw new Error('Invalid symbols response from backend')
+  }
+  return symbols
 }
 
 /**

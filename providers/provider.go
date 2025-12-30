@@ -9,6 +9,12 @@ type PriceData struct {
 	Change24h float64 `json:"change_24h"`
 }
 
+// SymbolInfo represents a supported cryptocurrency
+type SymbolInfo struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 // Provider defines the interface for price data providers
 type Provider interface {
 	// ID returns the provider's unique identifier
@@ -17,8 +23,11 @@ type Provider interface {
 	// Name returns the provider's display name
 	Name() string
 
-	// FetchPrice retrieves the current price for a cryptocurrency
-	FetchPrice(ctx context.Context, symbol string) (*PriceData, error)
+	// FetchPrices retrieves prices for multiple cryptocurrencies
+	FetchPrices(ctx context.Context, symbols []string) ([]*PriceData, error)
+
+	// GetSupportedSymbols returns list of supported cryptocurrencies
+	GetSupportedSymbols() []SymbolInfo
 
 	// RequiresAPIKey returns true if the provider needs an API key
 	RequiresAPIKey() bool

@@ -2,13 +2,18 @@ export interface Config {
   provider_id: string
   api_keys: Record<string, string>
   refresh_seconds: number
-  symbol: string
+  symbols: string[]
 }
 
 export interface ProviderInfo {
   id: string
   name: string
   requiresApiKey: boolean
+}
+
+export interface SymbolInfo {
+  id: string
+  name: string
 }
 
 // Type guards for runtime validation
@@ -18,7 +23,7 @@ export function isConfig(obj: unknown): obj is Config {
   return (
     typeof c.provider_id === 'string' &&
     typeof c.refresh_seconds === 'number' &&
-    typeof c.symbol === 'string' &&
+    Array.isArray(c.symbols) &&
     typeof c.api_keys === 'object' &&
     c.api_keys !== null
   )
@@ -32,4 +37,10 @@ export function isProviderInfo(obj: unknown): obj is ProviderInfo {
     typeof p.name === 'string' &&
     typeof p.requiresApiKey === 'boolean'
   )
+}
+
+export function isSymbolInfo(obj: unknown): obj is SymbolInfo {
+  if (typeof obj !== 'object' || obj === null) return false
+  const s = obj as Record<string, unknown>
+  return typeof s.id === 'string' && typeof s.name === 'string'
 }

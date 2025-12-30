@@ -1,6 +1,7 @@
 import { SettingsApiKey } from '@/features/settings/presentations/SettingsApiKey'
 import { SettingsProvider } from '@/features/settings/presentations/SettingsProvider'
 import { SettingsRefreshInterval } from '@/features/settings/presentations/SettingsRefreshInterval'
+import { SettingsSymbols } from '@/features/settings/presentations/SettingsSymbols'
 import { hideWindow } from '@/features/settings/services/configService'
 import { useConfig } from '@/features/settings/states/useConfig'
 import { useSettingsProvider } from '@/features/settings/states/useSettingsProvider'
@@ -21,6 +22,8 @@ export function SettingsView() {
       <SettingsProvider />
 
       {currentProvider?.requiresApiKey && <SettingsApiKey />}
+
+      <SettingsSymbols />
 
       <SettingsRefreshInterval />
 

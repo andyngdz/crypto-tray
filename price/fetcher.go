@@ -12,7 +12,7 @@ import (
 )
 
 // Callback is called when price data is fetched
-type Callback func(data *providers.PriceData, err error)
+type Callback func(data []*providers.PriceData, err error)
 
 // Fetcher periodically fetches cryptocurrency prices
 type Fetcher struct {
@@ -108,12 +108,14 @@ func (f *Fetcher) fetchOnce(ctx context.Context, cfg config.Config) {
 		return
 	}
 
-	// Configure API key if present
-	if key, ok := cfg.APIKeys[cfg.ProviderID]; ok && key != "" {
-		provider.SetAPIKey(key)
+	if len(cfg.Symbols) == 0 {
+		if f.callback != nil {
+			f.callback([]*providers.PriceData{}, nil)
+		}
+		return
 	}
 
-	data, err := provider.FetchPrice(ctx, cfg.Symbol)
+	data, err := provider.FetchPrices(ctx, cfg.Symbols)
 	if f.callback != nil {
 		f.callback(data, err)
 	}

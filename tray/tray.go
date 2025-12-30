@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 
+	"crypto-tray/providers"
 	"crypto-tray/services"
 
 	"github.com/getlantern/systray"
@@ -17,27 +18,22 @@ type Manager struct {
 	onOpenSettings func()
 	onRefreshNow   func()
 	onQuit         func()
-	priceItem      *systray.MenuItem
-	currentSymbol  string
+	priceItems     map[string]*systray.MenuItem
+	symbols        []string
 }
 
-// New creates a new tray manager with the initial symbol
-func New(initialSymbol string, onOpenSettings, onRefreshNow, onQuit func()) *Manager {
-	symbol := initialSymbol
-	if symbol == "" {
-		symbol = "---"
+// New creates a new tray manager with the initial symbols
+func New(symbols []string, onOpenSettings, onRefreshNow, onQuit func()) *Manager {
+	if len(symbols) == 0 {
+		symbols = []string{"---"}
 	}
 	return &Manager{
 		onOpenSettings: onOpenSettings,
 		onRefreshNow:   onRefreshNow,
 		onQuit:         onQuit,
-		currentSymbol:  symbol,
+		priceItems:     make(map[string]*systray.MenuItem),
+		symbols:        symbols,
 	}
-}
-
-// SetSymbol updates the current symbol used in display
-func (t *Manager) SetSymbol(symbol string) {
-	t.currentSymbol = symbol
 }
 
 // Setup registers the tray without blocking - use this with Wails
@@ -52,12 +48,14 @@ func (t *Manager) Run() {
 
 func (t *Manager) onReady() {
 	systray.SetIcon(iconData)
-	systray.SetTitle(fmt.Sprintf("%s $--,---", t.currentSymbol))
+	systray.SetTitle(fmt.Sprintf("%s $--,---", t.symbols[0]))
 	systray.SetTooltip("Crypto Tray - Loading...")
 
-	// Create menu items
-	t.priceItem = systray.AddMenuItem(fmt.Sprintf("%s $--,---", t.currentSymbol), "Current price")
-	t.priceItem.Disable()
+	for _, symbol := range t.symbols {
+		item := systray.AddMenuItem(fmt.Sprintf("%s $--,---", symbol), "Current price")
+		item.Disable()
+		t.priceItems[symbol] = item
+	}
 
 	systray.AddSeparator()
 
@@ -68,7 +66,6 @@ func (t *Manager) onReady() {
 
 	quitItem := systray.AddMenuItem("Quit", "Exit the application")
 
-	// Handle menu clicks
 	go func() {
 		for {
 			select {
@@ -87,23 +84,65 @@ func (t *Manager) onExit() {
 	t.onQuit()
 }
 
-// UpdatePrice updates the tray display with new price data
-func (t *Manager) UpdatePrice(symbol string, price float64) {
-	displayText := fmt.Sprintf("%s %s", symbol, services.FormatPrice(price))
-	systray.SetTitle(displayText)
-	systray.SetTooltip(fmt.Sprintf("Crypto Tray - %s", displayText))
-	t.priceItem.SetTitle(displayText)
+// UpdatePrices updates the tray display with multiple price data
+func (t *Manager) UpdatePrices(data []*providers.PriceData) {
+	if len(data) == 0 {
+		return
+	}
+
+	primarySymbol := t.symbols[0]
+	var primaryData *providers.PriceData
+	for _, item := range data {
+		displayText := fmt.Sprintf("%s %s", item.Symbol, services.FormatPrice(item.Price))
+		if menuItem, ok := t.priceItems[item.Symbol]; ok {
+			menuItem.SetTitle(displayText)
+		}
+
+		if item.Symbol == primarySymbol {
+			primaryData = item
+		}
+	}
+
+	if primaryData != nil {
+		displayText := fmt.Sprintf("%s %s", primaryData.Symbol, services.FormatPrice(primaryData.Price))
+		systray.SetTitle(displayText)
+		systray.SetTooltip(fmt.Sprintf("Crypto Tray - %s", displayText))
+	}
 }
 
 // SetError updates tray to show error state
 func (t *Manager) SetError(msg string) {
-	systray.SetTitle(fmt.Sprintf("%s $???", t.currentSymbol))
+	primarySymbol := t.symbols[0]
+	systray.SetTitle(fmt.Sprintf("%s $???", primarySymbol))
 	systray.SetTooltip("Error: " + msg)
-	t.priceItem.SetTitle("Error fetching price")
+	for symbol, menuItem := range t.priceItems {
+		menuItem.SetTitle(fmt.Sprintf("%s Error", symbol))
+	}
 }
 
 // SetLoading shows loading state
 func (t *Manager) SetLoading() {
-	systray.SetTitle(fmt.Sprintf("%s ...", t.currentSymbol))
+	primarySymbol := t.symbols[0]
+	systray.SetTitle(fmt.Sprintf("%s ...", primarySymbol))
 	systray.SetTooltip("Crypto Tray - Loading...")
+}
+
+// SetSymbols updates the tracked currencies
+func (t *Manager) SetSymbols(symbols []string) {
+	if len(symbols) == 0 {
+		return
+	}
+
+	t.symbols = symbols
+	primarySymbol := symbols[0]
+	systray.SetTitle(fmt.Sprintf("%s $--,---", primarySymbol))
+
+	// Note: systray doesn't support removing menu items at runtime
+	// The menu will be rebuilt on next app restart
+	t.priceItems = make(map[string]*systray.MenuItem)
+	for _, symbol := range symbols {
+		item := systray.AddMenuItem(fmt.Sprintf("%s $--,---", symbol), "Current price")
+		item.Disable()
+		t.priceItems[symbol] = item
+	}
 }
