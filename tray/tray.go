@@ -13,15 +13,6 @@ import (
 //go:embed icon.png
 var iconData []byte
 
-// Manager handles system tray operations
-type Manager struct {
-	onOpenSettings func()
-	onRefreshNow   func()
-	onQuit         func()
-	priceItems     map[string]*systray.MenuItem
-	symbols        []string
-}
-
 // New creates a new tray manager with the initial symbols
 func New(symbols []string, onOpenSettings, onRefreshNow, onQuit func()) *Manager {
 	if len(symbols) == 0 {

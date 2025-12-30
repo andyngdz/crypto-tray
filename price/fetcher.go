@@ -11,9 +11,6 @@ import (
 	"crypto-tray/providers"
 )
 
-// Callback is called when price data is fetched
-type Callback func(data []*providers.PriceData, err error)
-
 // Fetcher periodically fetches cryptocurrency prices
 type Fetcher struct {
 	registry      *providers.Registry
