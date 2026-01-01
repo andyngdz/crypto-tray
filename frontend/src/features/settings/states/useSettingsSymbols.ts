@@ -36,7 +36,7 @@ export function useSettingsSymbols(): UseSettingsSymbolsReturn {
   const selectedSymbols = useMemo(() => {
     return selectedIds
       .map((id) => availableSymbols.find((s) => s.id === id))
-      .filter((s): s is SymbolInfo => s !== undefined)
+      .filter((s): s is SymbolInfo => !!s)
   }, [availableSymbols, selectedIds])
 
   const onSelect = (key: Key | null) => {

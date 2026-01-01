@@ -67,3 +67,16 @@ npm run build   # Build frontend assets
 - `build/bin/` - Compiled binaries
 - `build/darwin/` - macOS build configuration (Info.plist)
 - `build/windows/` - Windows build configuration (manifests, installer, icons)
+
+## Code Style
+
+**General**
+
+- DRY (Don't Repeat Yourself)
+- Type-safe without `any`
+
+**Frontend**
+
+- Modular design - separate presentation components from logic (hooks)
+- Feature-based patterns - organize code by feature, not by type
+- Use `!!value` instead of `value !== undefined` for filtering nullish values
