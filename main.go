@@ -58,6 +58,12 @@ func main() {
 		}
 	})
 
+	// Connect symbol changes to tray
+	deps.App.setOnSymbolsChanged(func(symbols []string) {
+		trayManager.SetSymbols(symbols)
+		fetcher.RefreshNow()
+	})
+
 	// Setup systray before Wails starts (shares GTK context)
 	trayManager.Setup()
 

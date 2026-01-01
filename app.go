@@ -19,10 +19,11 @@ type ProviderInfo struct {
 
 // App struct
 type App struct {
-	ctx           context.Context
-	ctxMu         sync.RWMutex
-	configManager *config.Manager
-	registry      *providers.Registry
+	ctx              context.Context
+	ctxMu            sync.RWMutex
+	configManager    *config.Manager
+	registry         *providers.Registry
+	onSymbolsChanged func(symbols []string)
 }
 
 // NewApp creates a new App application struct
@@ -70,7 +71,33 @@ func (a *App) GetConfig() config.Config {
 
 // SaveConfig saves updated configuration
 func (a *App) SaveConfig(cfg config.Config) error {
-	return a.configManager.Update(cfg)
+	oldCfg := a.configManager.Get()
+	if err := a.configManager.Update(cfg); err != nil {
+		return err
+	}
+	// Notify if symbols changed
+	if a.onSymbolsChanged != nil && !equalSymbols(oldCfg.Symbols, cfg.Symbols) {
+		a.onSymbolsChanged(cfg.Symbols)
+	}
+	return nil
+}
+
+// setOnSymbolsChanged sets callback for when symbols change (internal use only)
+func (a *App) setOnSymbolsChanged(callback func(symbols []string)) {
+	a.onSymbolsChanged = callback
+}
+
+// equalSymbols compares two symbol slices for equality
+func equalSymbols(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 // GetAvailableProviders returns list of available API providers

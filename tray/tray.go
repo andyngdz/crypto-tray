@@ -22,7 +22,7 @@ func New(symbols []string, onOpenSettings, onRefreshNow, onQuit func()) *Manager
 		onOpenSettings: onOpenSettings,
 		onRefreshNow:   onRefreshNow,
 		onQuit:         onQuit,
-		priceItems:     make(map[string]*systray.MenuItem),
+		priceSlots:     make([]*systray.MenuItem, 0, maxPriceSlots),
 		symbols:        symbols,
 	}
 }
@@ -42,11 +42,16 @@ func (t *Manager) onReady() {
 	systray.SetTitle(fmt.Sprintf("%s $--,---", t.symbols[0]))
 	systray.SetTooltip("Crypto Tray - Loading...")
 
-	for _, symbol := range t.symbols {
-		item := systray.AddMenuItem(fmt.Sprintf("%s $--,---", symbol), "Current price")
+	// Pre-allocate menu item slots
+	for i := 0; i < maxPriceSlots; i++ {
+		item := systray.AddMenuItem("", "Current price")
 		item.Disable()
-		t.priceItems[symbol] = item
+		item.Hide()
+		t.priceSlots = append(t.priceSlots, item)
 	}
+
+	// Initialize with current symbols
+	t.updateSlots()
 
 	systray.AddSeparator()
 
@@ -75,46 +80,71 @@ func (t *Manager) onExit() {
 	t.onQuit()
 }
 
+// updateSlots syncs the pre-allocated slots with current symbols
+func (t *Manager) updateSlots() {
+	for i, slot := range t.priceSlots {
+		if i < len(t.symbols) {
+			symbol := t.symbols[i]
+			slot.SetTitle(fmt.Sprintf("%s $--,---", symbol))
+			slot.Show()
+		} else {
+			slot.Hide()
+		}
+	}
+}
+
 // UpdatePrices updates the tray display with multiple price data
 func (t *Manager) UpdatePrices(data []*providers.PriceData) {
 	if len(data) == 0 {
 		return
 	}
 
-	primarySymbol := t.symbols[0]
-	var primaryData *providers.PriceData
-	for _, item := range data {
-		displayText := fmt.Sprintf("%s %s", item.Symbol, services.FormatPrice(item.Price))
-		if menuItem, ok := t.priceItems[item.Symbol]; ok {
-			menuItem.SetTitle(displayText)
-		}
+	// Build a map for quick lookup
+	priceMap := make(map[string]*providers.PriceData)
+	for _, d := range data {
+		priceMap[d.Symbol] = d
+	}
 
-		if item.Symbol == primarySymbol {
-			primaryData = item
+	// Update each slot with its symbol's price
+	for i, symbol := range t.symbols {
+		if i >= len(t.priceSlots) {
+			break
+		}
+		if d, ok := priceMap[symbol]; ok {
+			displayText := fmt.Sprintf("%s %s", d.Symbol, services.FormatPrice(d.Price))
+			t.priceSlots[i].SetTitle(displayText)
 		}
 	}
 
-	if primaryData != nil {
-		displayText := fmt.Sprintf("%s %s", primaryData.Symbol, services.FormatPrice(primaryData.Price))
-		systray.SetTitle(displayText)
-		systray.SetTooltip(fmt.Sprintf("Crypto Tray - %s", displayText))
+	// Update tray title with primary symbol
+	if len(t.symbols) > 0 {
+		if d, ok := priceMap[t.symbols[0]]; ok {
+			displayText := fmt.Sprintf("%s %s", d.Symbol, services.FormatPrice(d.Price))
+			systray.SetTitle(displayText)
+			systray.SetTooltip(fmt.Sprintf("Crypto Tray - %s", displayText))
+		}
 	}
 }
 
 // SetError updates tray to show error state
 func (t *Manager) SetError(msg string) {
-	primarySymbol := t.symbols[0]
-	systray.SetTitle(fmt.Sprintf("%s $???", primarySymbol))
+	if len(t.symbols) > 0 {
+		systray.SetTitle(fmt.Sprintf("%s $???", t.symbols[0]))
+	}
 	systray.SetTooltip("Error: " + msg)
-	for symbol, menuItem := range t.priceItems {
-		menuItem.SetTitle(fmt.Sprintf("%s Error", symbol))
+	for i, symbol := range t.symbols {
+		if i >= len(t.priceSlots) {
+			break
+		}
+		t.priceSlots[i].SetTitle(fmt.Sprintf("%s Error", symbol))
 	}
 }
 
 // SetLoading shows loading state
 func (t *Manager) SetLoading() {
-	primarySymbol := t.symbols[0]
-	systray.SetTitle(fmt.Sprintf("%s ...", primarySymbol))
+	if len(t.symbols) > 0 {
+		systray.SetTitle(fmt.Sprintf("%s ...", t.symbols[0]))
+	}
 	systray.SetTooltip("Crypto Tray - Loading...")
 }
 
@@ -124,16 +154,12 @@ func (t *Manager) SetSymbols(symbols []string) {
 		return
 	}
 
-	t.symbols = symbols
-	primarySymbol := symbols[0]
-	systray.SetTitle(fmt.Sprintf("%s $--,---", primarySymbol))
-
-	// Note: systray doesn't support removing menu items at runtime
-	// The menu will be rebuilt on next app restart
-	t.priceItems = make(map[string]*systray.MenuItem)
-	for _, symbol := range symbols {
-		item := systray.AddMenuItem(fmt.Sprintf("%s $--,---", symbol), "Current price")
-		item.Disable()
-		t.priceItems[symbol] = item
+	// Limit to max slots
+	if len(symbols) > maxPriceSlots {
+		symbols = symbols[:maxPriceSlots]
 	}
+
+	t.symbols = symbols
+	systray.SetTitle(fmt.Sprintf("%s $--,---", symbols[0]))
+	t.updateSlots()
 }

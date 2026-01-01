@@ -123,16 +123,20 @@ func (c *CoinGecko) GetSupportedSymbols() []SymbolInfo {
 // symbolToCoinID maps common symbols to CoinGecko coin IDs
 func symbolToCoinID(symbol string) string {
 	mapping := map[string]string{
-		"BTC":  "bitcoin",
-		"ETH":  "ethereum",
-		"USDT": "tether",
-		"BNB":  "binancecoin",
-		"SOL":  "solana",
-		"XRP":  "ripple",
-		"USDC": "usd-coin",
-		"ADA":  "cardano",
-		"DOGE": "dogecoin",
-		"AVAX": "avalanche-2",
+		"BTC":   "bitcoin",
+		"ETH":   "ethereum",
+		"USDT":  "tether",
+		"BNB":   "binancecoin",
+		"SOL":   "solana",
+		"XRP":   "ripple",
+		"USDC":  "usd-coin",
+		"ADA":   "cardano",
+		"DOGE":  "dogecoin",
+		"AVAX":  "avalanche-2",
+		"DOT":   "polkadot",
+		"LINK":  "chainlink",
+		"MATIC": "matic-network",
+		"ATOM":  "cosmos",
 	}
 	if id, ok := mapping[strings.ToUpper(symbol)]; ok {
 		return id
