@@ -14,8 +14,8 @@ export function SettingsSymbols() {
         <TagGroup onRemove={onRemove}>
           <TagGroup.List>
             {selectedSymbols.map((s) => (
-              <Tag key={s.id} id={s.id} textValue={s.name}>
-                {s.id.toUpperCase()}
+              <Tag key={s.symbol} id={s.symbol} textValue={s.name}>
+                {s.symbol}
               </Tag>
             ))}
           </TagGroup.List>
@@ -37,8 +37,8 @@ export function SettingsSymbols() {
         <ComboBox.Popover>
           <ListBox>
             {filteredSymbols.map((s) => (
-              <ListBox.Item key={s.id} id={s.id} textValue={s.name}>
-                {s.id.toUpperCase()} - {s.name}
+              <ListBox.Item key={s.symbol} id={s.symbol} textValue={s.name}>
+                {s.symbol} - {s.name}
               </ListBox.Item>
             ))}
           </ListBox>

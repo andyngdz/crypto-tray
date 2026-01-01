@@ -13,8 +13,8 @@ type Provider interface {
 	// FetchPrices retrieves prices for multiple cryptocurrencies
 	FetchPrices(ctx context.Context, symbols []string) ([]*PriceData, error)
 
-	// GetSupportedSymbols returns list of supported cryptocurrencies
-	GetSupportedSymbols() []SymbolInfo
+	// FetchSymbols fetches list of supported cryptocurrencies from the API
+	FetchSymbols(ctx context.Context) ([]SymbolInfo, error)
 
 	// RequiresAPIKey returns true if the provider needs an API key
 	RequiresAPIKey() bool

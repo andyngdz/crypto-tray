@@ -12,8 +12,9 @@ export interface ProviderInfo {
 }
 
 export interface SymbolInfo {
-  id: string
-  name: string
+  coinId: string // Provider-specific ID for API calls (e.g., "bitcoin")
+  symbol: string // User-facing ticker in uppercase (e.g., "BTC")
+  name: string // Full display name (e.g., "Bitcoin")
 }
 
 // Type guards for runtime validation
@@ -42,5 +43,9 @@ export function isProviderInfo(obj: unknown): obj is ProviderInfo {
 export function isSymbolInfo(obj: unknown): obj is SymbolInfo {
   if (typeof obj !== 'object' || obj === null) return false
   const s = obj as Record<string, unknown>
-  return typeof s.id === 'string' && typeof s.name === 'string'
+  return (
+    typeof s.coinId === 'string' &&
+    typeof s.symbol === 'string' &&
+    typeof s.name === 'string'
+  )
 }

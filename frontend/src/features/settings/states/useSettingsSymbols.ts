@@ -24,18 +24,18 @@ export function useSettingsSymbols(): UseSettingsSymbolsReturn {
   const filteredSymbols = useMemo(() => {
     return availableSymbols.filter((s) => {
       // Exclude already selected
-      if (selectedIds.includes(s.id)) return false
-      // Apply search filter (case-insensitive on id and name)
+      if (selectedIds.includes(s.symbol)) return false
+      // Apply search filter (case-insensitive on symbol and name)
       if (!inputValue) return true
       const search = inputValue.toLowerCase()
-      return s.id.toLowerCase().includes(search) || s.name.toLowerCase().includes(search)
+      return s.symbol.toLowerCase().includes(search) || s.name.toLowerCase().includes(search)
     })
   }, [availableSymbols, selectedIds, inputValue])
 
   // Get symbol info for selected values
   const selectedSymbols = useMemo(() => {
     return selectedIds
-      .map((id) => availableSymbols.find((s) => s.id === id))
+      .map((symbol) => availableSymbols.find((s) => s.symbol === symbol))
       .filter((s): s is SymbolInfo => !!s)
   }, [availableSymbols, selectedIds])
 

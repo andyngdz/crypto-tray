@@ -43,18 +43,20 @@ export namespace main {
 }
 
 export namespace providers {
-	
+
 	export class SymbolInfo {
-	    id: string;
+	    coinId: string;
+	    symbol: string;
 	    name: string;
-	
+
 	    static createFrom(source: any = {}) {
 	        return new SymbolInfo(source);
 	    }
-	
+
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.id = source["id"];
+	        this.coinId = source["coinId"];
+	        this.symbol = source["symbol"];
 	        this.name = source["name"];
 	    }
 	}

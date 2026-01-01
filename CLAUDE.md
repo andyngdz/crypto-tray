@@ -43,6 +43,15 @@ npm run dev     # Vite dev server
 npm run build   # Build frontend assets
 ```
 
+### Ubuntu
+
+On Ubuntu, use the `-tags webkit2_41` flag for webkit2gtk 4.1 compatibility:
+
+```bash
+wails dev -tags webkit2_41
+wails build -tags webkit2_41
+```
+
 ## Architecture
 
 **Backend (Go)**

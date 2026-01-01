@@ -121,7 +121,14 @@ func (a *App) GetAvailableSymbols() []providers.SymbolInfo {
 	if !ok {
 		return []providers.SymbolInfo{}
 	}
-	return provider.GetSupportedSymbols()
+
+	ctx := a.GetContext()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	symbols, _ := provider.FetchSymbols(ctx)
+	return symbols
 }
 
 // HideWindow hides the settings window
