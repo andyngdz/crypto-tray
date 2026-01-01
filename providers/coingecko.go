@@ -2,13 +2,11 @@ package providers
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"log"
-	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"crypto-tray/services"
 )
 
 // CoinGecko API constants
@@ -27,31 +25,43 @@ type coingeckoCoin struct {
 	Name   string `json:"name"`
 }
 
+// coingeckoPriceResponse represents the price API response
+type coingeckoPriceResponse map[string]struct {
+	USD         float64 `json:"usd"`
+	USDChange24 float64 `json:"usd_24h_change"`
+}
+
 // CoinGecko implements the Provider interface for the CoinGecko API
 type CoinGecko struct {
-	apiKey     string
-	httpClient *http.Client
+	httpClient *services.HTTPClient
 
 	// Symbol cache
-	cacheMu    sync.RWMutex
-	symbols    []SymbolInfo
-	symbolMap  map[string]SymbolInfo // symbol -> SymbolInfo lookup
-	cacheTime  time.Time
+	cacheMu   sync.RWMutex
+	symbols   []SymbolInfo
+	symbolMap map[string]SymbolInfo
+	cacheTime time.Time
 }
 
 // NewCoinGecko creates a new CoinGecko provider
 func NewCoinGecko() *CoinGecko {
 	return &CoinGecko{
-		httpClient: &http.Client{Timeout: coingeckoTimeout},
+		httpClient: services.NewHTTPClient(services.HTTPClientConfig{
+			BaseURL:      coingeckoBaseURL,
+			Timeout:      coingeckoTimeout,
+			APIKeyHeader: coingeckoAPIKeyHeader,
+		}),
 	}
 }
 
 func (c *CoinGecko) ID() string           { return "coingecko" }
 func (c *CoinGecko) Name() string         { return "CoinGecko" }
 func (c *CoinGecko) RequiresAPIKey() bool { return false }
-func (c *CoinGecko) SetAPIKey(key string) { c.apiKey = key }
 
-// FetchPrices retrieves prices for multiple cryptocurrencies in a single API call
+func (c *CoinGecko) SetAPIKey(key string) {
+	c.httpClient.SetAPIKey(key)
+}
+
+// FetchPrices retrieves prices for multiple cryptocurrencies
 func (c *CoinGecko) FetchPrices(ctx context.Context, symbols []string) ([]*PriceData, error) {
 	if len(symbols) == 0 {
 		return []*PriceData{}, nil
@@ -62,39 +72,14 @@ func (c *CoinGecko) FetchPrices(ctx context.Context, symbols []string) ([]*Price
 		coinIDs = append(coinIDs, c.symbolToCoinID(symbol))
 	}
 
-	ids := strings.Join(coinIDs, ",")
-	url := fmt.Sprintf(
-		"%s/simple/price?ids=%s&vs_currencies=%s&include_24hr_change=true",
-		coingeckoBaseURL,
-		ids,
-		coingeckoCurrency,
-	)
-
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-	if err != nil {
-		return nil, err
+	query := map[string]string{
+		"ids":               strings.Join(coinIDs, ","),
+		"vs_currencies":     coingeckoCurrency,
+		"include_24hr_change": "true",
 	}
 
-	if c.apiKey != "" {
-		req.Header.Set(coingeckoAPIKeyHeader, c.apiKey)
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API returned status %d", resp.StatusCode)
-	}
-
-	var result map[string]struct {
-		USD         float64 `json:"usd"`
-		USDChange24 float64 `json:"usd_24h_change"`
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	var result coingeckoPriceResponse
+	if err := c.httpClient.GetWithQuery(ctx, "/simple/price", query, &result); err != nil {
 		return nil, err
 	}
 
@@ -105,7 +90,6 @@ func (c *CoinGecko) FetchPrices(ctx context.Context, symbols []string) ([]*Price
 		if !ok {
 			continue
 		}
-
 		prices = append(prices, &PriceData{
 			Symbol:    symbol,
 			Price:     data.USD,
@@ -128,32 +112,8 @@ func (c *CoinGecko) FetchSymbols(ctx context.Context) ([]SymbolInfo, error) {
 	c.cacheMu.RUnlock()
 
 	// Fetch from API
-	url := fmt.Sprintf("%s/coins/list", coingeckoBaseURL)
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	if c.apiKey != "" {
-		req.Header.Set(coingeckoAPIKeyHeader, c.apiKey)
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		log.Printf("FetchSymbols: API request failed: %v", err)
-		return []SymbolInfo{}, nil
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		log.Printf("FetchSymbols: API returned status %d", resp.StatusCode)
-		return []SymbolInfo{}, nil
-	}
-
 	var coins []coingeckoCoin
-
-	if err := json.NewDecoder(resp.Body).Decode(&coins); err != nil {
-		log.Printf("FetchSymbols: failed to decode response: %v", err)
+	if err := c.httpClient.Get(ctx, "/coins/list", &coins); err != nil {
 		return []SymbolInfo{}, nil
 	}
 
