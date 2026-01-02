@@ -11,6 +11,7 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"crypto-tray/price"
 	"crypto-tray/providers"
@@ -55,12 +56,18 @@ func main() {
 		}
 		if len(data) > 0 {
 			trayManager.UpdatePrices(data)
+			runtime.EventsEmit(deps.App.GetContext(), "price:update", data)
 		}
 	})
 
 	// Connect symbol changes to tray
 	deps.App.setOnSymbolsChanged(func(symbols []string) {
 		trayManager.SetSymbols(symbols)
+		fetcher.RefreshNow()
+	})
+
+	// Connect manual refresh from frontend
+	deps.App.setOnRefreshPrices(func() {
 		fetcher.RefreshNow()
 	})
 
@@ -81,6 +88,10 @@ func main() {
 		StartHidden:      true,
 		OnStartup: func(ctx context.Context) {
 			deps.App.startup(ctx)
+			// Preload symbol cache for price lookups
+			if provider, ok := deps.Registry.Get(cfg.ProviderID); ok {
+				provider.FetchSymbols(ctx)
+			}
 			fetcher.Start()
 		},
 		OnShutdown: func(ctx context.Context) {

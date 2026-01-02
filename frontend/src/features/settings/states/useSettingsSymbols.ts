@@ -18,32 +18,30 @@ export function useSettingsSymbols(): UseSettingsSymbolsReturn {
   const { config, updateConfig, availableSymbols } = useConfig()
   const [inputValue, setInputValue] = useState('')
 
-  const selectedIds: string[] = config?.symbols ?? []
+  const selectedCoinIds: string[] = config?.symbols ?? []
 
   // Filter out already-selected symbols and apply search filter
   const filteredSymbols = useMemo(() => {
+    const search = inputValue.toLowerCase()
     return availableSymbols.filter((s) => {
-      // Exclude already selected
-      if (selectedIds.includes(s.symbol)) return false
-      // Apply search filter (case-insensitive on symbol and name)
+      if (selectedCoinIds.includes(s.coinId)) return false
       if (!inputValue) return true
-      const search = inputValue.toLowerCase()
       return s.symbol.toLowerCase().includes(search) || s.name.toLowerCase().includes(search)
     })
-  }, [availableSymbols, selectedIds, inputValue])
+  }, [availableSymbols, selectedCoinIds, inputValue])
 
   // Get symbol info for selected values
   const selectedSymbols = useMemo(() => {
-    return selectedIds
-      .map((symbol) => availableSymbols.find((s) => s.symbol === symbol))
+    return selectedCoinIds
+      .map((coinId) => availableSymbols.find((s) => s.coinId === coinId))
       .filter((s): s is SymbolInfo => !!s)
-  }, [availableSymbols, selectedIds])
+  }, [availableSymbols, selectedCoinIds])
 
   const onSelect = (key: Key | null) => {
     if (key) {
-      const symbol = key as string
-      if (!selectedIds.includes(symbol)) {
-        updateConfig({ symbols: [...selectedIds, symbol] })
+      const coinId = key as string
+      if (!selectedCoinIds.includes(coinId)) {
+        updateConfig({ symbols: [...selectedCoinIds, coinId] })
       }
       setInputValue('')
     }
@@ -51,7 +49,7 @@ export function useSettingsSymbols(): UseSettingsSymbolsReturn {
 
   const onRemove = (keys: Set<Key>) => {
     const toRemove = new Set([...keys].map((k) => k as string))
-    const updated = selectedIds.filter((s) => !toRemove.has(s))
+    const updated = selectedCoinIds.filter((id) => !toRemove.has(id))
     if (updated.length > 0) {
       updateConfig({ symbols: updated })
     }

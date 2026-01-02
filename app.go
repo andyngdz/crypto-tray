@@ -24,6 +24,7 @@ type App struct {
 	configManager    *config.Manager
 	registry         *providers.Registry
 	onSymbolsChanged func(symbols []string)
+	onRefreshPrices  func()
 }
 
 // NewApp creates a new App application struct
@@ -50,18 +51,12 @@ func (a *App) GetContext() context.Context {
 
 // ShowWindow shows the settings window (for tray callback)
 func (a *App) ShowWindow() {
-	ctx := a.GetContext()
-	if ctx != nil {
-		runtime.WindowShow(ctx)
-	}
+	runtime.WindowShow(a.GetContext())
 }
 
 // QuitApp quits the application (for tray callback)
 func (a *App) QuitApp() {
-	ctx := a.GetContext()
-	if ctx != nil {
-		runtime.Quit(ctx)
-	}
+	runtime.Quit(a.GetContext())
 }
 
 // GetConfig returns the current configuration
@@ -76,7 +71,7 @@ func (a *App) SaveConfig(cfg config.Config) error {
 		return err
 	}
 	// Notify if symbols changed
-	if a.onSymbolsChanged != nil && !equalSymbols(oldCfg.Symbols, cfg.Symbols) {
+	if !equalSymbols(oldCfg.Symbols, cfg.Symbols) {
 		a.onSymbolsChanged(cfg.Symbols)
 	}
 	return nil
@@ -122,16 +117,31 @@ func (a *App) GetAvailableSymbols() []providers.SymbolInfo {
 		return []providers.SymbolInfo{}
 	}
 
-	ctx := a.GetContext()
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
-	symbols, _ := provider.FetchSymbols(ctx)
+	symbols, _ := provider.FetchSymbols(a.GetContext())
 	return symbols
 }
 
 // HideWindow hides the settings window
 func (a *App) HideWindow() {
 	runtime.WindowHide(a.ctx)
+}
+
+// FetchPrices fetches current prices for the specified symbols
+func (a *App) FetchPrices(symbols []string) ([]*providers.PriceData, error) {
+	cfg := a.configManager.Get()
+	provider, ok := a.registry.Get(cfg.ProviderID)
+	if !ok {
+		return nil, nil
+	}
+	return provider.FetchPrices(a.GetContext(), symbols)
+}
+
+// RefreshPrices triggers an immediate price refresh
+func (a *App) RefreshPrices() {
+	a.onRefreshPrices()
+}
+
+// setOnRefreshPrices sets callback for manual price refresh (internal use only)
+func (a *App) setOnRefreshPrices(callback func()) {
+	a.onRefreshPrices = callback
 }

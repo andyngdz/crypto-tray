@@ -14,7 +14,7 @@ export function SettingsSymbols() {
         <TagGroup onRemove={onRemove}>
           <TagGroup.List>
             {selectedSymbols.map((s) => (
-              <Tag key={s.symbol} id={s.symbol} textValue={s.name}>
+              <Tag key={s.coinId} id={s.coinId} textValue={s.name}>
                 {s.symbol}
               </Tag>
             ))}
@@ -37,7 +37,7 @@ export function SettingsSymbols() {
         <ComboBox.Popover>
           <ListBox>
             {filteredSymbols.map((s) => (
-              <ListBox.Item key={s.symbol} id={s.symbol} textValue={s.name}>
+              <ListBox.Item key={s.coinId} id={s.coinId} textValue={s.name}>
                 {s.symbol} - {s.name}
               </ListBox.Item>
             ))}

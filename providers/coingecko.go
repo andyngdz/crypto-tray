@@ -18,8 +18,8 @@ const (
 	coingeckoCacheTTL     = 24 * time.Hour
 )
 
-// coingeckoCoin represents a coin from the CoinGecko /coins/list API
-type coingeckoCoin struct {
+// coingeckoMarketCoin represents a coin from the CoinGecko /coins/markets API
+type coingeckoMarketCoin struct {
 	ID     string `json:"id"`
 	Symbol string `json:"symbol"`
 	Name   string `json:"name"`
@@ -36,10 +36,10 @@ type CoinGecko struct {
 	httpClient *services.HTTPClient
 
 	// Symbol cache
-	cacheMu   sync.RWMutex
-	symbols   []SymbolInfo
-	symbolMap map[string]SymbolInfo
-	cacheTime time.Time
+	cacheMu    sync.RWMutex
+	symbols    []SymbolInfo
+	coinIDMap  map[string]SymbolInfo // keyed by coinID for reverse lookup
+	cacheTime  time.Time
 }
 
 // NewCoinGecko creates a new CoinGecko provider
@@ -61,20 +61,15 @@ func (c *CoinGecko) SetAPIKey(key string) {
 	c.httpClient.SetAPIKey(key)
 }
 
-// FetchPrices retrieves prices for multiple cryptocurrencies
-func (c *CoinGecko) FetchPrices(ctx context.Context, symbols []string) ([]*PriceData, error) {
-	if len(symbols) == 0 {
+// FetchPrices retrieves prices for multiple cryptocurrencies by coinID
+func (c *CoinGecko) FetchPrices(ctx context.Context, coinIDs []string) ([]*PriceData, error) {
+	if len(coinIDs) == 0 {
 		return []*PriceData{}, nil
 	}
 
-	coinIDs := make([]string, 0, len(symbols))
-	for _, symbol := range symbols {
-		coinIDs = append(coinIDs, c.symbolToCoinID(symbol))
-	}
-
 	query := map[string]string{
-		"ids":               strings.Join(coinIDs, ","),
-		"vs_currencies":     coingeckoCurrency,
+		"ids":                  strings.Join(coinIDs, ","),
+		"vs_currencies":        coingeckoCurrency,
 		"include_24hr_change": "true",
 	}
 
@@ -83,15 +78,15 @@ func (c *CoinGecko) FetchPrices(ctx context.Context, symbols []string) ([]*Price
 		return nil, err
 	}
 
-	prices := make([]*PriceData, 0, len(symbols))
-	for _, symbol := range symbols {
-		coinID := c.symbolToCoinID(symbol)
+	prices := make([]*PriceData, 0, len(coinIDs))
+	for _, coinID := range coinIDs {
 		data, ok := result[coinID]
 		if !ok {
 			continue
 		}
 		prices = append(prices, &PriceData{
-			Symbol:    symbol,
+			CoinID:    coinID,
+			Symbol:    c.coinIDToSymbol(coinID),
 			Price:     data.USD,
 			Change24h: data.USDChange24,
 		})
@@ -100,7 +95,7 @@ func (c *CoinGecko) FetchPrices(ctx context.Context, symbols []string) ([]*Price
 	return prices, nil
 }
 
-// FetchSymbols fetches the list of supported cryptocurrencies from CoinGecko API
+// FetchSymbols fetches top cryptocurrencies by market cap from CoinGecko API
 func (c *CoinGecko) FetchSymbols(ctx context.Context) ([]SymbolInfo, error) {
 	// Check cache first
 	c.cacheMu.RLock()
@@ -111,15 +106,22 @@ func (c *CoinGecko) FetchSymbols(ctx context.Context) ([]SymbolInfo, error) {
 	}
 	c.cacheMu.RUnlock()
 
-	// Fetch from API
-	var coins []coingeckoCoin
-	if err := c.httpClient.Get(ctx, "/coins/list", &coins); err != nil {
+	// Fetch top 250 coins by market cap
+	query := map[string]string{
+		"vs_currency": coingeckoCurrency,
+		"order":       "market_cap_desc",
+		"per_page":    "250",
+		"page":        "1",
+	}
+
+	var coins []coingeckoMarketCoin
+	if err := c.httpClient.GetWithQuery(ctx, "/coins/markets", query, &coins); err != nil {
 		return []SymbolInfo{}, nil
 	}
 
 	// Map to SymbolInfo and build lookup map
 	symbols := make([]SymbolInfo, 0, len(coins))
-	symbolMap := make(map[string]SymbolInfo, len(coins))
+	coinIDMap := make(map[string]SymbolInfo, len(coins))
 
 	for _, coin := range coins {
 		info := SymbolInfo{
@@ -128,28 +130,26 @@ func (c *CoinGecko) FetchSymbols(ctx context.Context) ([]SymbolInfo, error) {
 			Name:   coin.Name,
 		}
 		symbols = append(symbols, info)
-		symbolMap[info.Symbol] = info
+		coinIDMap[coin.ID] = info
 	}
 
 	// Update cache
 	c.cacheMu.Lock()
 	c.symbols = symbols
-	c.symbolMap = symbolMap
+	c.coinIDMap = coinIDMap
 	c.cacheTime = time.Now()
 	c.cacheMu.Unlock()
 
 	return symbols, nil
 }
 
-// symbolToCoinID maps a symbol to its CoinGecko coin ID using cached data
-func (c *CoinGecko) symbolToCoinID(symbol string) string {
-	upperSymbol := strings.ToUpper(symbol)
-
+// coinIDToSymbol maps a coinID to its display symbol
+func (c *CoinGecko) coinIDToSymbol(coinID string) string {
 	c.cacheMu.RLock()
 	defer c.cacheMu.RUnlock()
 
-	if info, ok := c.symbolMap[upperSymbol]; ok {
-		return info.CoinID
+	if info, ok := c.coinIDMap[coinID]; ok {
+		return info.Symbol
 	}
-	return strings.ToLower(symbol)
+	return strings.ToUpper(coinID)
 }

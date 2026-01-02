@@ -99,18 +99,18 @@ func (t *Manager) UpdatePrices(data []*providers.PriceData) {
 		return
 	}
 
-	// Build a map for quick lookup
+	// Build a map for quick lookup by coinID
 	priceMap := make(map[string]*providers.PriceData)
 	for _, d := range data {
-		priceMap[d.Symbol] = d
+		priceMap[d.CoinID] = d
 	}
 
-	// Update each slot with its symbol's price
-	for i, symbol := range t.symbols {
+	// Update each slot with its coinID's price
+	for i, coinID := range t.symbols {
 		if i >= len(t.priceSlots) {
 			break
 		}
-		if d, ok := priceMap[symbol]; ok {
+		if d, ok := priceMap[coinID]; ok {
 			displayText := fmt.Sprintf("%s %s", d.Symbol, services.FormatPrice(d.Price))
 			t.priceSlots[i].SetTitle(displayText)
 		}
