@@ -19,10 +19,12 @@ type ProviderInfo struct {
 
 // App struct
 type App struct {
-	ctx           context.Context
-	ctxMu         sync.RWMutex
-	configManager *config.Manager
-	registry      *providers.Registry
+	ctx              context.Context
+	ctxMu            sync.RWMutex
+	configManager    *config.Manager
+	registry         *providers.Registry
+	onSymbolsChanged func(symbols []string)
+	onRefreshPrices  func()
 }
 
 // NewApp creates a new App application struct
@@ -49,18 +51,12 @@ func (a *App) GetContext() context.Context {
 
 // ShowWindow shows the settings window (for tray callback)
 func (a *App) ShowWindow() {
-	ctx := a.GetContext()
-	if ctx != nil {
-		runtime.WindowShow(ctx)
-	}
+	runtime.WindowShow(a.GetContext())
 }
 
 // QuitApp quits the application (for tray callback)
 func (a *App) QuitApp() {
-	ctx := a.GetContext()
-	if ctx != nil {
-		runtime.Quit(ctx)
-	}
+	runtime.Quit(a.GetContext())
 }
 
 // GetConfig returns the current configuration
@@ -70,7 +66,33 @@ func (a *App) GetConfig() config.Config {
 
 // SaveConfig saves updated configuration
 func (a *App) SaveConfig(cfg config.Config) error {
-	return a.configManager.Update(cfg)
+	oldCfg := a.configManager.Get()
+	if err := a.configManager.Update(cfg); err != nil {
+		return err
+	}
+	// Notify if symbols changed
+	if !equalSymbols(oldCfg.Symbols, cfg.Symbols) {
+		a.onSymbolsChanged(cfg.Symbols)
+	}
+	return nil
+}
+
+// setOnSymbolsChanged sets callback for when symbols change (internal use only)
+func (a *App) setOnSymbolsChanged(callback func(symbols []string)) {
+	a.onSymbolsChanged = callback
+}
+
+// equalSymbols compares two symbol slices for equality
+func equalSymbols(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 // GetAvailableProviders returns list of available API providers
@@ -94,10 +116,32 @@ func (a *App) GetAvailableSymbols() []providers.SymbolInfo {
 	if !ok {
 		return []providers.SymbolInfo{}
 	}
-	return provider.GetSupportedSymbols()
+
+	symbols, _ := provider.FetchSymbols(a.GetContext())
+	return symbols
 }
 
 // HideWindow hides the settings window
 func (a *App) HideWindow() {
 	runtime.WindowHide(a.ctx)
+}
+
+// FetchPrices fetches current prices for the specified symbols
+func (a *App) FetchPrices(symbols []string) ([]*providers.PriceData, error) {
+	cfg := a.configManager.Get()
+	provider, ok := a.registry.Get(cfg.ProviderID)
+	if !ok {
+		return nil, nil
+	}
+	return provider.FetchPrices(a.GetContext(), symbols)
+}
+
+// RefreshPrices triggers an immediate price refresh
+func (a *App) RefreshPrices() {
+	a.onRefreshPrices()
+}
+
+// setOnRefreshPrices sets callback for manual price refresh (internal use only)
+func (a *App) setOnRefreshPrices(callback func()) {
+	a.onRefreshPrices = callback
 }

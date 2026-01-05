@@ -5,7 +5,7 @@ const (
 	MinRefreshSeconds     = 10
 	MaxRefreshSeconds     = 3600
 	DefaultRefreshSeconds = 30
-	DefaultSymbol         = "BTC"
+	DefaultSymbol         = "bitcoin"
 	DefaultProviderID     = "coingecko"
 	configFileName        = "config.json"
 	appDirName            = "crypto-tray"

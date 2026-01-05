@@ -11,6 +11,7 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"crypto-tray/price"
 	"crypto-tray/providers"
@@ -36,9 +37,7 @@ func main() {
 		cfg.Symbols,
 		deps.App.ShowWindow,
 		func() { // onRefreshNow
-			if fetcher != nil {
-				fetcher.RefreshNow()
-			}
+			fetcher.RefreshNow()
 		},
 		func() { // onQuit
 			deps.App.QuitApp()
@@ -55,7 +54,19 @@ func main() {
 		}
 		if len(data) > 0 {
 			trayManager.UpdatePrices(data)
+			runtime.EventsEmit(deps.App.GetContext(), "price:update", data)
 		}
+	})
+
+	// Connect symbol changes to tray
+	deps.App.setOnSymbolsChanged(func(symbols []string) {
+		trayManager.SetSymbols(symbols)
+		fetcher.RefreshNow()
+	})
+
+	// Connect manual refresh from frontend
+	deps.App.setOnRefreshPrices(func() {
+		fetcher.RefreshNow()
 	})
 
 	// Setup systray before Wails starts (shares GTK context)
@@ -64,9 +75,9 @@ func main() {
 	// Run Wails in main goroutine (GTK requires main thread)
 	err = wails.Run(&options.App{
 		Title:     "Crypto Tray Settings",
-		Width:     500,
+		Width:     360,
 		Height:    400,
-		MinWidth:  400,
+		MinWidth:  360,
 		MinHeight: 300,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
@@ -75,6 +86,17 @@ func main() {
 		StartHidden:      true,
 		OnStartup: func(ctx context.Context) {
 			deps.App.startup(ctx)
+
+			if provider, ok := deps.Registry.Get(cfg.ProviderID); ok {
+				// Preload symbol cache
+				provider.FetchSymbols(ctx)
+
+				// Fetch initial prices synchronously
+				if data, err := provider.FetchPrices(ctx, cfg.Symbols); err == nil && len(data) > 0 {
+					trayManager.UpdatePrices(data)
+				}
+			}
+
 			fetcher.Start()
 		},
 		OnShutdown: func(ctx context.Context) {
@@ -84,6 +106,7 @@ func main() {
 			deps.App,
 		},
 	})
+
 	if err != nil {
 		log.Fatal("Wails error:", err)
 	}

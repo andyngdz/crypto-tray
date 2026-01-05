@@ -1,35 +1,49 @@
-import { Label, ListBox, Select } from '@heroui/react'
+import { ComboBox, Input, Label, ListBox, Tag, TagGroup } from '@heroui/react'
 
-import { useConfig } from '@/features/settings/states/useConfig'
 import { useSettingsSymbols } from '@/features/settings/states/useSettingsSymbols'
 
 export function SettingsSymbols() {
-  const { availableSymbols } = useConfig()
-  const { value, onChange } = useSettingsSymbols()
+  const { inputValue, setInputValue, filteredSymbols, selectedSymbols, onSelect, onRemove } =
+    useSettingsSymbols()
 
   return (
-    <Select
-      className="w-full"
-      placeholder="Select currencies"
-      selectionMode="multiple"
-      value={value}
-      onChange={onChange}
-    >
+    <div className="flex flex-col gap-2">
       <Label>Currencies</Label>
-      <Select.Trigger>
-        <Select.Value />
-        <Select.Indicator />
-      </Select.Trigger>
-      <Select.Popover>
-        <ListBox selectionMode="multiple">
-          {availableSymbols.map((s) => (
-            <ListBox.Item key={s.id} id={s.id} textValue={s.name}>
-              {s.id.toUpperCase()}, {s.name}
-              <ListBox.ItemIndicator />
-            </ListBox.Item>
-          ))}
-        </ListBox>
-      </Select.Popover>
-    </Select>
+
+      {selectedSymbols.length > 0 && (
+        <TagGroup onRemove={onRemove}>
+          <TagGroup.List>
+            {selectedSymbols.map((s) => (
+              <Tag key={s.coinId} id={s.coinId} textValue={s.name}>
+                {s.symbol}
+              </Tag>
+            ))}
+          </TagGroup.List>
+        </TagGroup>
+      )}
+
+      <ComboBox
+        allowsEmptyCollection
+        className="w-full"
+        inputValue={inputValue}
+        selectedKey={null}
+        onInputChange={setInputValue}
+        onSelectionChange={onSelect}
+      >
+        <ComboBox.InputGroup>
+          <Input placeholder="Search currencies..." />
+          <ComboBox.Trigger />
+        </ComboBox.InputGroup>
+        <ComboBox.Popover>
+          <ListBox>
+            {filteredSymbols.map((s) => (
+              <ListBox.Item key={s.coinId} id={s.coinId} textValue={s.name}>
+                {s.symbol} - {s.name}
+              </ListBox.Item>
+            ))}
+          </ListBox>
+        </ComboBox.Popover>
+      </ComboBox>
+    </div>
   )
 }

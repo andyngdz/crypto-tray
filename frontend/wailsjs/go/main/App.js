@@ -33,3 +33,11 @@ export function SaveConfig(arg1) {
 export function ShowWindow() {
   return window['go']['main']['App']['ShowWindow']();
 }
+
+export function FetchPrices(arg1) {
+  return window['go']['main']['App']['FetchPrices'](arg1);
+}
+
+export function RefreshPrices() {
+  return window['go']['main']['App']['RefreshPrices']();
+}

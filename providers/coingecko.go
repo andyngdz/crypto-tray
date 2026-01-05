@@ -2,11 +2,11 @@ package providers
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"net/http"
 	"strings"
+	"sync"
 	"time"
+
+	"crypto-tray/services"
 )
 
 // CoinGecko API constants
@@ -15,83 +15,78 @@ const (
 	coingeckoCurrency     = "usd"
 	coingeckoAPIKeyHeader = "x-cg-demo-api-key"
 	coingeckoTimeout      = 10 * time.Second
+	coingeckoCacheTTL     = 24 * time.Hour
 )
+
+// coingeckoMarketCoin represents a coin from the CoinGecko /coins/markets API
+type coingeckoMarketCoin struct {
+	ID     string `json:"id"`
+	Symbol string `json:"symbol"`
+	Name   string `json:"name"`
+}
+
+// coingeckoPriceResponse represents the price API response
+type coingeckoPriceResponse map[string]struct {
+	USD         float64 `json:"usd"`
+	USDChange24 float64 `json:"usd_24h_change"`
+}
 
 // CoinGecko implements the Provider interface for the CoinGecko API
 type CoinGecko struct {
-	apiKey     string
-	httpClient *http.Client
+	httpClient *services.HTTPClient
+
+	// Symbol cache
+	cacheMu    sync.RWMutex
+	symbols    []SymbolInfo
+	coinIDMap  map[string]SymbolInfo // keyed by coinID for reverse lookup
+	cacheTime  time.Time
 }
 
 // NewCoinGecko creates a new CoinGecko provider
 func NewCoinGecko() *CoinGecko {
 	return &CoinGecko{
-		httpClient: &http.Client{Timeout: coingeckoTimeout},
+		httpClient: services.NewHTTPClient(services.HTTPClientConfig{
+			BaseURL:      coingeckoBaseURL,
+			Timeout:      coingeckoTimeout,
+			APIKeyHeader: coingeckoAPIKeyHeader,
+		}),
 	}
 }
 
 func (c *CoinGecko) ID() string           { return "coingecko" }
 func (c *CoinGecko) Name() string         { return "CoinGecko" }
 func (c *CoinGecko) RequiresAPIKey() bool { return false }
-func (c *CoinGecko) SetAPIKey(key string) { c.apiKey = key }
 
-// FetchPrices retrieves prices for multiple cryptocurrencies in a single API call
-func (c *CoinGecko) FetchPrices(ctx context.Context, symbols []string) ([]*PriceData, error) {
-	if len(symbols) == 0 {
+func (c *CoinGecko) SetAPIKey(key string) {
+	c.httpClient.SetAPIKey(key)
+}
+
+// FetchPrices retrieves prices for multiple cryptocurrencies by coinID
+func (c *CoinGecko) FetchPrices(ctx context.Context, coinIDs []string) ([]*PriceData, error) {
+	if len(coinIDs) == 0 {
 		return []*PriceData{}, nil
 	}
 
-	coinIDs := make([]string, 0, len(symbols))
-	for _, symbol := range symbols {
-		coinIDs = append(coinIDs, symbolToCoinID(symbol))
+	query := map[string]string{
+		"ids":                  strings.Join(coinIDs, ","),
+		"vs_currencies":        coingeckoCurrency,
+		"include_24hr_change": "true",
 	}
 
-	ids := strings.Join(coinIDs, ",")
-	url := fmt.Sprintf(
-		"%s/simple/price?ids=%s&vs_currencies=%s&include_24hr_change=true",
-		coingeckoBaseURL,
-		ids,
-		coingeckoCurrency,
-	)
-
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
-	if err != nil {
+	var result coingeckoPriceResponse
+	if err := c.httpClient.GetWithQuery(ctx, "/simple/price", query, &result); err != nil {
 		return nil, err
 	}
 
-	if c.apiKey != "" {
-		req.Header.Set(coingeckoAPIKeyHeader, c.apiKey)
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API returned status %d", resp.StatusCode)
-	}
-
-	var result map[string]struct {
-		USD         float64 `json:"usd"`
-		USDChange24 float64 `json:"usd_24h_change"`
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, err
-	}
-
-	prices := make([]*PriceData, 0, len(symbols))
-	for _, symbol := range symbols {
-		coinID := symbolToCoinID(symbol)
+	prices := make([]*PriceData, 0, len(coinIDs))
+	for _, coinID := range coinIDs {
 		data, ok := result[coinID]
 		if !ok {
 			continue
 		}
-
 		prices = append(prices, &PriceData{
-			Symbol:    symbol,
+			CoinID:    coinID,
+			Symbol:    c.coinIDToSymbol(coinID),
 			Price:     data.USD,
 			Change24h: data.USDChange24,
 		})
@@ -100,42 +95,61 @@ func (c *CoinGecko) FetchPrices(ctx context.Context, symbols []string) ([]*Price
 	return prices, nil
 }
 
-// GetSupportedSymbols returns list of supported cryptocurrencies
-func (c *CoinGecko) GetSupportedSymbols() []SymbolInfo {
-	return []SymbolInfo{
-		{ID: "BTC", Name: "Bitcoin"},
-		{ID: "ETH", Name: "Ethereum"},
-		{ID: "SOL", Name: "Solana"},
-		{ID: "ADA", Name: "Cardano"},
-		{ID: "DOT", Name: "Polkadot"},
-		{ID: "LINK", Name: "Chainlink"},
-		{ID: "AVAX", Name: "Avalanche"},
-		{ID: "MATIC", Name: "Polygon"},
-		{ID: "ATOM", Name: "Cosmos"},
-		{ID: "XRP", Name: "Ripple"},
-		{ID: "USDT", Name: "Tether"},
-		{ID: "USDC", Name: "USD Coin"},
-		{ID: "BNB", Name: "BNB"},
-		{ID: "DOGE", Name: "Dogecoin"},
+// FetchSymbols fetches top cryptocurrencies by market cap from CoinGecko API
+func (c *CoinGecko) FetchSymbols(ctx context.Context) ([]SymbolInfo, error) {
+	// Check cache first
+	c.cacheMu.RLock()
+	if len(c.symbols) > 0 && time.Since(c.cacheTime) < coingeckoCacheTTL {
+		symbols := c.symbols
+		c.cacheMu.RUnlock()
+		return symbols, nil
 	}
+	c.cacheMu.RUnlock()
+
+	// Fetch top 250 coins by market cap
+	query := map[string]string{
+		"vs_currency": coingeckoCurrency,
+		"order":       "market_cap_desc",
+		"per_page":    "250",
+		"page":        "1",
+	}
+
+	var coins []coingeckoMarketCoin
+	if err := c.httpClient.GetWithQuery(ctx, "/coins/markets", query, &coins); err != nil {
+		return []SymbolInfo{}, nil
+	}
+
+	// Map to SymbolInfo and build lookup map
+	symbols := make([]SymbolInfo, 0, len(coins))
+	coinIDMap := make(map[string]SymbolInfo, len(coins))
+
+	for _, coin := range coins {
+		info := SymbolInfo{
+			CoinID: coin.ID,
+			Symbol: strings.ToUpper(coin.Symbol),
+			Name:   coin.Name,
+		}
+		symbols = append(symbols, info)
+		coinIDMap[coin.ID] = info
+	}
+
+	// Update cache
+	c.cacheMu.Lock()
+	c.symbols = symbols
+	c.coinIDMap = coinIDMap
+	c.cacheTime = time.Now()
+	c.cacheMu.Unlock()
+
+	return symbols, nil
 }
 
-// symbolToCoinID maps common symbols to CoinGecko coin IDs
-func symbolToCoinID(symbol string) string {
-	mapping := map[string]string{
-		"BTC":  "bitcoin",
-		"ETH":  "ethereum",
-		"USDT": "tether",
-		"BNB":  "binancecoin",
-		"SOL":  "solana",
-		"XRP":  "ripple",
-		"USDC": "usd-coin",
-		"ADA":  "cardano",
-		"DOGE": "dogecoin",
-		"AVAX": "avalanche-2",
+// coinIDToSymbol maps a coinID to its display symbol
+func (c *CoinGecko) coinIDToSymbol(coinID string) string {
+	c.cacheMu.RLock()
+	defer c.cacheMu.RUnlock()
+
+	if info, ok := c.coinIDMap[coinID]; ok {
+		return info.Symbol
 	}
-	if id, ok := mapping[strings.ToUpper(symbol)]; ok {
-		return id
-	}
-	return strings.ToLower(symbol)
+	return strings.ToUpper(coinID)
 }

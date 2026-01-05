@@ -65,10 +65,7 @@ func (f *Fetcher) RefreshNow() {
 }
 
 func (f *Fetcher) loop(ctx context.Context) {
-	// Get initial config and fetch immediately
 	cfg := f.configManager.Get()
-	f.fetchOnce(ctx, cfg)
-
 	currentInterval := cfg.RefreshSeconds
 	ticker := time.NewTicker(time.Duration(currentInterval) * time.Second)
 	defer ticker.Stop()
