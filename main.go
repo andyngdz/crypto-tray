@@ -82,7 +82,10 @@ func main() {
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
+		BackgroundColour: &options.RGBA{R: 0, G: 0, B: 0, A: 0},
+		Frameless:        true,
+		CSSDragProperty:  "--wails-draggable",
+		CSSDragValue:     "drag",
 		StartHidden:      true,
 		OnStartup: func(ctx context.Context) {
 			deps.App.startup(ctx)

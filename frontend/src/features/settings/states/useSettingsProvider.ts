@@ -1,13 +1,13 @@
+import { useMemo } from 'react'
+
 import { useConfig } from '@/features/settings/states/useConfig'
 import type { ProviderInfo } from '@/features/settings/types'
-import type { Key } from '@heroui/react'
-import { useMemo } from 'react'
 
 export interface UseSettingsProviderReturn {
   providerId: string
   providers: ProviderInfo[]
   currentProvider?: ProviderInfo
-  onChange: (value: Key | null) => void
+  onChange: (value: string) => void
 }
 
 export function useSettingsProvider(): UseSettingsProviderReturn {
@@ -20,9 +20,9 @@ export function useSettingsProvider(): UseSettingsProviderReturn {
     [providers, providerId]
   )
 
-  const onChange = (value: Key | null) => {
+  const onChange = (value: string) => {
     if (value) {
-      updateConfig({ provider_id: String(value) })
+      updateConfig({ provider_id: value })
     }
   }
 

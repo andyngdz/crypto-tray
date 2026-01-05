@@ -1,3 +1,5 @@
+import { Alert, Box, Button } from '@mui/material'
+
 import { SettingsApiKey } from '@/features/settings/presentations/SettingsApiKey'
 import { SettingsProvider } from '@/features/settings/presentations/SettingsProvider'
 import { SettingsRefreshInterval } from '@/features/settings/presentations/SettingsRefreshInterval'
@@ -5,19 +7,14 @@ import { SettingsSymbols } from '@/features/settings/presentations/SettingsSymbo
 import { hideWindow } from '@/features/settings/services/configService'
 import { useConfig } from '@/features/settings/states/useConfig'
 import { useSettingsProvider } from '@/features/settings/states/useSettingsProvider'
-import { Button } from '@heroui/react'
 
 export function SettingsView() {
   const { saving, error } = useConfig()
   const { currentProvider } = useSettingsProvider()
 
   return (
-    <div className="p-6 min-h-screen flex flex-col gap-4">
-      {error && (
-        <div className="p-3 text-sm text-white bg-danger rounded-lg">
-          {error}
-        </div>
-      )}
+    <Box sx={{ p: 3, minHeight: 'calc(100vh - 32px)', display: 'flex', flexDirection: 'column', gap: 2 }}>
+      {error && <Alert severity="error">{error}</Alert>}
 
       <SettingsProvider />
 
@@ -28,12 +25,14 @@ export function SettingsView() {
       <SettingsRefreshInterval />
 
       <Button
-        className="w-full mt-auto"
-        onPress={hideWindow}
-        isDisabled={saving}
+        variant="contained"
+        fullWidth
+        onClick={hideWindow}
+        disabled={saving}
+        sx={{ mt: 'auto' }}
       >
         {saving ? 'Saving...' : 'Close'}
       </Button>
-    </div>
+    </Box>
   )
 }
