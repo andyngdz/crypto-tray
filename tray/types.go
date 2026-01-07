@@ -11,5 +11,6 @@ type Manager struct {
 	onRefreshNow   func()
 	onQuit         func()
 	priceSlots     []*systray.MenuItem // Pre-allocated menu item slots
-	symbols        []string            // Currently active symbols (maps to slots by index)
+	symbols        []string            // Currently active coinIDs (maps to slots by index)
+	symbolMap      map[string]string   // coinID -> ticker symbol (e.g., "ethereum" -> "ETH")
 }

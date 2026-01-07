@@ -3,6 +3,7 @@ package tray
 import (
 	_ "embed"
 	"fmt"
+	"strings"
 
 	"crypto-tray/providers"
 	"crypto-tray/services"
@@ -24,6 +25,7 @@ func New(symbols []string, onOpenSettings, onRefreshNow, onQuit func()) *Manager
 		onQuit:         onQuit,
 		priceSlots:     make([]*systray.MenuItem, 0, maxPriceSlots),
 		symbols:        symbols,
+		symbolMap:      make(map[string]string),
 	}
 }
 
@@ -39,7 +41,7 @@ func (t *Manager) Run() {
 
 func (t *Manager) onReady() {
 	systray.SetIcon(iconData)
-	systray.SetTitle(fmt.Sprintf("%s $--,---", t.symbols[0]))
+	systray.SetTitle(services.FormatTrayTitle(t.getDisplaySymbols(), "$--,---"))
 	systray.SetTooltip("Crypto Tray - Loading...")
 
 	// Pre-allocate menu item slots
@@ -82,15 +84,28 @@ func (t *Manager) onExit() {
 
 // updateSlots syncs the pre-allocated slots with current symbols
 func (t *Manager) updateSlots() {
+	displaySymbols := t.getDisplaySymbols()
 	for i, slot := range t.priceSlots {
 		if i < len(t.symbols) {
-			symbol := t.symbols[i]
-			slot.SetTitle(fmt.Sprintf("%s $--,---", symbol))
+			slot.SetTitle(fmt.Sprintf("%s $--,---", displaySymbols[i]))
 			slot.Show()
 		} else {
 			slot.Hide()
 		}
 	}
+}
+
+// getDisplaySymbols converts coinIDs to ticker symbols for display
+func (t *Manager) getDisplaySymbols() []string {
+	result := make([]string, len(t.symbols))
+	for i, coinID := range t.symbols {
+		if symbol, ok := t.symbolMap[coinID]; ok {
+			result[i] = symbol
+		} else {
+			result[i] = strings.ToUpper(coinID)
+		}
+	}
+	return result
 }
 
 // UpdatePrices updates the tray display with multiple price data
@@ -99,10 +114,11 @@ func (t *Manager) UpdatePrices(data []*providers.PriceData) {
 		return
 	}
 
-	// Build a map for quick lookup by coinID
+	// Build a map for quick lookup by coinID and update symbolMap
 	priceMap := make(map[string]*providers.PriceData)
 	for _, d := range data {
 		priceMap[d.CoinID] = d
+		t.symbolMap[d.CoinID] = d.Symbol
 	}
 
 	// Update each slot with its coinID's price
@@ -116,34 +132,39 @@ func (t *Manager) UpdatePrices(data []*providers.PriceData) {
 		}
 	}
 
-	// Update tray title with primary symbol
-	if len(t.symbols) > 0 {
-		if d, ok := priceMap[t.symbols[0]]; ok {
-			displayText := fmt.Sprintf("%s %s", d.Symbol, services.FormatPrice(d.Price))
-			systray.SetTitle(displayText)
-			systray.SetTooltip(fmt.Sprintf("Crypto Tray - %s", displayText))
+	// Update tray title with all currencies
+	var titleParts []string
+	for _, coinID := range t.symbols {
+		if d, ok := priceMap[coinID]; ok {
+			titleParts = append(titleParts, fmt.Sprintf("%s %s", d.Symbol, services.FormatPrice(d.Price)))
 		}
+	}
+	if len(titleParts) > 0 {
+		title := strings.Join(titleParts, " | ")
+		systray.SetTitle(title)
+		systray.SetTooltip("Crypto Tray - " + title)
 	}
 }
 
 // SetError updates tray to show error state
 func (t *Manager) SetError(msg string) {
+	displaySymbols := t.getDisplaySymbols()
 	if len(t.symbols) > 0 {
-		systray.SetTitle(fmt.Sprintf("%s $???", t.symbols[0]))
+		systray.SetTitle(services.FormatTrayTitle(displaySymbols, "$???"))
 	}
 	systray.SetTooltip("Error: " + msg)
-	for i, symbol := range t.symbols {
+	for i := range t.symbols {
 		if i >= len(t.priceSlots) {
 			break
 		}
-		t.priceSlots[i].SetTitle(fmt.Sprintf("%s Error", symbol))
+		t.priceSlots[i].SetTitle(fmt.Sprintf("%s Error", displaySymbols[i]))
 	}
 }
 
 // SetLoading shows loading state
 func (t *Manager) SetLoading() {
 	if len(t.symbols) > 0 {
-		systray.SetTitle(fmt.Sprintf("%s ...", t.symbols[0]))
+		systray.SetTitle(services.FormatTrayTitle(t.getDisplaySymbols(), "..."))
 	}
 	systray.SetTooltip("Crypto Tray - Loading...")
 }
@@ -160,6 +181,6 @@ func (t *Manager) SetSymbols(symbols []string) {
 	}
 
 	t.symbols = symbols
-	systray.SetTitle(fmt.Sprintf("%s $--,---", symbols[0]))
+	systray.SetTitle(services.FormatTrayTitle(t.getDisplaySymbols(), "$--,---"))
 	t.updateSlots()
 }
