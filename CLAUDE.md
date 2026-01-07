@@ -87,5 +87,6 @@ wails build -tags webkit2_41
 **Frontend**
 
 - Modular design - separate presentation components from logic (hooks)
+- No logic in presentation components (`presentations/`) - put all logic (formatting, calculations, transformations) in hooks (`states/`)
 - Feature-based patterns - organize code by feature, not by type
 - Use `!!value` instead of `value !== undefined` for filtering nullish values

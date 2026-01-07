@@ -56,6 +56,7 @@ func NewCoinGecko() *CoinGecko {
 func (c *CoinGecko) ID() string           { return "coingecko" }
 func (c *CoinGecko) Name() string         { return "CoinGecko" }
 func (c *CoinGecko) RequiresAPIKey() bool { return false }
+func (c *CoinGecko) DefaultCoinID() string { return "bitcoin" }
 
 func (c *CoinGecko) SetAPIKey(key string) {
 	c.httpClient.SetAPIKey(key)

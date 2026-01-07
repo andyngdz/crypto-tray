@@ -21,6 +21,7 @@ func InitApp() (*AppDependencies, error) {
 
 	registry := providers.NewRegistry()
 	registry.Register(providers.NewCoinGecko())
+	registry.Register(providers.NewBinance())
 
 	app := NewApp(configManager, registry)
 
