@@ -1,6 +1,15 @@
 @import 'tailwindcss';
-@import '@heroui/styles';
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 12px;
+}
 
 #root {
   min-height: 100vh;
+  border-radius: 12px;
+  overflow: hidden;
 }

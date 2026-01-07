@@ -1,9 +1,8 @@
 import { useConfig } from '@/features/settings/states/useConfig'
-import type { Key } from '@heroui/react'
 
 export interface UseSettingsRefreshIntervalReturn {
   refreshSeconds: number
-  onChange: (value: Key | null) => void
+  onChange: (value: string) => void
 }
 
 export function useSettingsRefreshInterval(): UseSettingsRefreshIntervalReturn {
@@ -11,7 +10,7 @@ export function useSettingsRefreshInterval(): UseSettingsRefreshIntervalReturn {
 
   const refreshSeconds = config?.refresh_seconds ?? 0
 
-  const onChange = (value: Key | null) => {
+  const onChange = (value: string) => {
     if (value) {
       updateConfig({ refresh_seconds: Number(value) })
     }

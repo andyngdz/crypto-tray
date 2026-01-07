@@ -1,49 +1,23 @@
-import { ComboBox, Input, Label, ListBox, Tag, TagGroup } from '@heroui/react'
+import { Autocomplete, TextField } from '@mui/material'
 
 import { useSettingsSymbols } from '@/features/settings/states/useSettingsSymbols'
+import type { SymbolInfo } from '@/features/settings/types'
 
 export function SettingsSymbols() {
-  const { inputValue, setInputValue, filteredSymbols, selectedSymbols, onSelect, onRemove } =
-    useSettingsSymbols()
+  const { availableSymbols, selectedSymbols, onChange } = useSettingsSymbols()
 
   return (
-    <div className="flex flex-col gap-2">
-      <Label>Currencies</Label>
-
-      {selectedSymbols.length > 0 && (
-        <TagGroup onRemove={onRemove}>
-          <TagGroup.List>
-            {selectedSymbols.map((s) => (
-              <Tag key={s.coinId} id={s.coinId} textValue={s.name}>
-                {s.symbol}
-              </Tag>
-            ))}
-          </TagGroup.List>
-        </TagGroup>
+    <Autocomplete
+      multiple
+      options={availableSymbols}
+      value={selectedSymbols}
+      onChange={(_, newValue) => onChange(newValue)}
+      getOptionLabel={(option: SymbolInfo) => `${option.symbol} - ${option.name}`}
+      isOptionEqualToValue={(option, value) => option.coinId === value.coinId}
+      renderInput={(params) => (
+        <TextField {...params} label="Currencies" placeholder="Search currencies..." />
       )}
-
-      <ComboBox
-        allowsEmptyCollection
-        className="w-full"
-        inputValue={inputValue}
-        selectedKey={null}
-        onInputChange={setInputValue}
-        onSelectionChange={onSelect}
-      >
-        <ComboBox.InputGroup>
-          <Input placeholder="Search currencies..." />
-          <ComboBox.Trigger />
-        </ComboBox.InputGroup>
-        <ComboBox.Popover>
-          <ListBox>
-            {filteredSymbols.map((s) => (
-              <ListBox.Item key={s.coinId} id={s.coinId} textValue={s.name}>
-                {s.symbol} - {s.name}
-              </ListBox.Item>
-            ))}
-          </ListBox>
-        </ComboBox.Popover>
-      </ComboBox>
-    </div>
+      ChipProps={{ size: 'small' }}
+    />
   )
 }
