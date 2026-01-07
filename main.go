@@ -75,10 +75,10 @@ func main() {
 	// Run Wails in main goroutine (GTK requires main thread)
 	err = wails.Run(&options.App{
 		Title:     "Crypto Tray Settings",
-		Width:     360,
-		Height:    400,
-		MinWidth:  360,
-		MinHeight: 300,
+		Width:     640,
+		Height:    800,
+		MinWidth:  640,
+		MinHeight: 600,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},

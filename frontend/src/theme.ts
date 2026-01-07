@@ -15,6 +15,7 @@ export const darkTheme = createTheme({
     MuiTextField: { defaultProps: { size: 'small' } },
     MuiSelect: { defaultProps: { size: 'small' } },
     MuiButton: { defaultProps: { size: 'small' } },
+    MuiChip: { defaultProps: { size: 'small' } },
     MuiAutocomplete: {
       defaultProps: { size: 'small' },
       styleOverrides: {
