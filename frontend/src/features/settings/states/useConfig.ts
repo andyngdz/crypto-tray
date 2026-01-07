@@ -39,7 +39,14 @@ export function useConfig() {
       queryClient.setQueryData(QUERY_KEYS.config, newConfig)
       return { previousConfig }
     },
-    onError: (_err, _newConfig, context) => {
+    onSuccess: (data, newConfig, context) => {
+      // If provider changed, invalidate symbols and refetch config to get reset symbols
+      if (context?.previousConfig?.provider_id !== newConfig.provider_id) {
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.symbols })
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.config })
+      }
+    },
+    onError: (err, _newConfig, context) => {
       if (context?.previousConfig) {
         queryClient.setQueryData(QUERY_KEYS.config, context.previousConfig)
       }
@@ -52,7 +59,8 @@ export function useConfig() {
     saveMutation.mutate({ ...currentConfig, ...updates })
   }
 
-  const loading = configQuery.isLoading || providersQuery.isLoading || symbolsQuery.isLoading
+  const loading =
+    configQuery.isLoading || providersQuery.isLoading || symbolsQuery.isLoading
   const error =
     configQuery.error?.message ||
     providersQuery.error?.message ||

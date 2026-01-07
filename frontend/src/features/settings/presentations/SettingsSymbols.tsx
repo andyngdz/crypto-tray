@@ -9,10 +9,10 @@ import {
 
 import { CryptoIcon } from '@/components/CryptoIcon'
 import { useSettingsSymbols } from '@/features/settings/states/useSettingsSymbols'
-import type { SymbolInfo } from '@/features/settings/types'
 
 export function SettingsSymbols() {
-  const { availableSymbols, selectedSymbols, onChange } = useSettingsSymbols()
+  const { availableSymbols, selectedSymbols, onChange, formatLabel } =
+    useSettingsSymbols()
 
   return (
     <Autocomplete
@@ -20,9 +20,7 @@ export function SettingsSymbols() {
       options={availableSymbols}
       value={selectedSymbols}
       onChange={(_, newValue) => onChange(newValue)}
-      getOptionLabel={(option: SymbolInfo) =>
-        `${option.symbol} - ${option.name}`
-      }
+      getOptionLabel={formatLabel}
       isOptionEqualToValue={(option, value) => option.coinId === value.coinId}
       renderOption={(props, option) => {
         const { key, ...otherProps } = props
@@ -31,7 +29,7 @@ export function SettingsSymbols() {
             <ListItemIcon sx={{ minWidth: 36 }}>
               <CryptoIcon symbol={option.symbol} />
             </ListItemIcon>
-            <ListItemText primary={`${option.symbol} - ${option.name}`} />
+            <ListItemText primary={formatLabel(option)} />
           </ListItem>
         )
       }}

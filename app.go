@@ -67,6 +67,15 @@ func (a *App) GetConfig() config.Config {
 // SaveConfig saves updated configuration
 func (a *App) SaveConfig(cfg config.Config) error {
 	oldCfg := a.configManager.Get()
+
+	// Reset symbols to provider's default when provider changes
+	if oldCfg.ProviderID != cfg.ProviderID {
+		newProvider, ok := a.registry.Get(cfg.ProviderID)
+		if ok {
+			cfg.Symbols = []string{newProvider.DefaultCoinID()}
+		}
+	}
+
 	if err := a.configManager.Update(cfg); err != nil {
 		return err
 	}
