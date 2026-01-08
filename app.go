@@ -19,12 +19,13 @@ type ProviderInfo struct {
 
 // App struct
 type App struct {
-	ctx              context.Context
-	ctxMu            sync.RWMutex
-	configManager    *config.Manager
-	registry         *providers.Registry
-	onSymbolsChanged func(symbols []string)
-	onRefreshPrices  func()
+	ctx                   context.Context
+	ctxMu                 sync.RWMutex
+	configManager         *config.Manager
+	registry              *providers.Registry
+	onSymbolsChanged      func(symbols []string)
+	onNumberFormatChanged func(format string)
+	onRefreshPrices       func()
 }
 
 // NewApp creates a new App application struct
@@ -83,12 +84,21 @@ func (a *App) SaveConfig(cfg config.Config) error {
 	if !equalSymbols(oldCfg.Symbols, cfg.Symbols) {
 		a.onSymbolsChanged(cfg.Symbols)
 	}
+	// Notify if number format changed
+	if oldCfg.NumberFormat != cfg.NumberFormat {
+		a.onNumberFormatChanged(cfg.NumberFormat)
+	}
 	return nil
 }
 
 // setOnSymbolsChanged sets callback for when symbols change (internal use only)
 func (a *App) setOnSymbolsChanged(callback func(symbols []string)) {
 	a.onSymbolsChanged = callback
+}
+
+// setOnNumberFormatChanged sets callback for when number format changes (internal use only)
+func (a *App) setOnNumberFormatChanged(callback func(format string)) {
+	a.onNumberFormatChanged = callback
 }
 
 // equalSymbols compares two symbol slices for equality

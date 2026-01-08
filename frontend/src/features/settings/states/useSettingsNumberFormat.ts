@@ -1,24 +1,24 @@
 import { CONFIG_DEFAULTS } from '@/features/settings/constants/defaults'
 import { useConfig } from '@/features/settings/states/useConfig'
 
-export interface UseSettingsRefreshIntervalReturn {
-  refreshSeconds: number
+export interface UseSettingsNumberFormatReturn {
+  numberFormat: string
   onChange: (value: string) => void
 }
 
-export function useSettingsRefreshInterval(): UseSettingsRefreshIntervalReturn {
+export function useSettingsNumberFormat(): UseSettingsNumberFormatReturn {
   const { config, updateConfig } = useConfig()
 
-  const refreshSeconds = config?.refresh_seconds ?? CONFIG_DEFAULTS.refreshSeconds
+  const numberFormat = config?.number_format ?? CONFIG_DEFAULTS.numberFormat
 
   const onChange = (value: string) => {
     if (value) {
-      updateConfig({ refresh_seconds: Number(value) })
+      updateConfig({ number_format: value })
     }
   }
 
   return {
-    refreshSeconds,
+    numberFormat,
     onChange,
   }
 }

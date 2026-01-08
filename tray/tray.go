@@ -14,8 +14,8 @@ import (
 //go:embed icon.png
 var iconData []byte
 
-// New creates a new tray manager with the initial symbols
-func New(symbols []string, onOpenSettings, onRefreshNow, onQuit func()) *Manager {
+// New creates a new tray manager with the initial symbols and number format
+func New(symbols []string, numberFormat string, onOpenSettings, onRefreshNow, onQuit func()) *Manager {
 	if len(symbols) == 0 {
 		symbols = []string{"---"}
 	}
@@ -26,7 +26,13 @@ func New(symbols []string, onOpenSettings, onRefreshNow, onQuit func()) *Manager
 		priceSlots:     make([]*systray.MenuItem, 0, maxPriceSlots),
 		symbols:        symbols,
 		symbolMap:      make(map[string]string),
+		numberFormat:   numberFormat,
 	}
+}
+
+// SetNumberFormat updates the number format for price display
+func (t *Manager) SetNumberFormat(format string) {
+	t.numberFormat = format
 }
 
 // Setup registers the tray without blocking - use this with Wails
@@ -127,7 +133,7 @@ func (t *Manager) UpdatePrices(data []*providers.PriceData) {
 			break
 		}
 		if d, ok := priceMap[coinID]; ok {
-			displayText := fmt.Sprintf("%s %s", d.Symbol, services.FormatPrice(d.Price))
+			displayText := fmt.Sprintf("%s %s", d.Symbol, services.FormatPrice(d.Price, t.numberFormat))
 			t.priceSlots[i].SetTitle(displayText)
 		}
 	}
@@ -136,7 +142,7 @@ func (t *Manager) UpdatePrices(data []*providers.PriceData) {
 	var titleParts []string
 	for _, coinID := range t.symbols {
 		if d, ok := priceMap[coinID]; ok {
-			titleParts = append(titleParts, fmt.Sprintf("%s %s", d.Symbol, services.FormatPrice(d.Price)))
+			titleParts = append(titleParts, fmt.Sprintf("%s %s", d.Symbol, services.FormatPrice(d.Price, t.numberFormat)))
 		}
 	}
 	if len(titleParts) > 0 {

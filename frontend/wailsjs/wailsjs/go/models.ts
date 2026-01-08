@@ -5,6 +5,7 @@ export namespace config {
 	    api_keys: Record<string, string>;
 	    refresh_seconds: number;
 	    symbols: string[];
+	    number_format: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -16,6 +17,7 @@ export namespace config {
 	        this.api_keys = source["api_keys"];
 	        this.refresh_seconds = source["refresh_seconds"];
 	        this.symbols = source["symbols"];
+	        this.number_format = source["number_format"];
 	    }
 	}
 

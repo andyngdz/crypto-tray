@@ -55,7 +55,9 @@ export function useConfig() {
 
   const updateConfig = (updates: Partial<Config>) => {
     const currentConfig = configQuery.data
+
     if (!currentConfig) return
+
     saveMutation.mutate({ ...currentConfig, ...updates })
   }
 
@@ -71,8 +73,8 @@ export function useConfig() {
     config: configQuery.data,
     providers: providersQuery.data ?? [],
     availableSymbols: symbolsQuery.data ?? [],
-    loading,
     saving: saveMutation.isPending,
+    loading,
     error,
     updateConfig,
   }
