@@ -20,4 +20,4 @@
 ## 5. Verification
 
 - [x] 5.1 Build with `wails build -tags webkit2_41`
-- [ ] 5.2 Run and verify exchange rates update correctly
+- [x] 5.2 Run and verify exchange rates update correctly

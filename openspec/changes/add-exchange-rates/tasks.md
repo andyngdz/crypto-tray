@@ -51,4 +51,4 @@
 
 - [x] 9.1 Build succeeds with `wails build -tags webkit2_41`
 - [x] 9.2 Run `wails dev -tags webkit2_41` - app starts successfully
-- [ ] 9.3 Manually set DisplayCurrency in config.json, restart, verify conversion
+- [x] 9.3 Manually set DisplayCurrency in config.json, restart, verify conversion
