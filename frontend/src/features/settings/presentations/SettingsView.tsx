@@ -3,6 +3,7 @@ import { Alert, Box, Button } from '@mui/material'
 import { SettingsApiKey } from '@/features/settings/presentations/SettingsApiKey'
 import { SettingsProvider } from '@/features/settings/presentations/SettingsProvider'
 import { SettingsRefreshInterval } from '@/features/settings/presentations/SettingsRefreshInterval'
+import { SettingsSection } from '@/features/settings/presentations/SettingsSection'
 import { SettingsSymbols } from '@/features/settings/presentations/SettingsSymbols'
 import { hideWindow } from '@/features/settings/services/configService'
 import { useConfig } from '@/features/settings/states/useConfig'
@@ -16,13 +17,15 @@ export function SettingsView() {
     <Box sx={{ p: 3, minHeight: 'calc(100vh - 32px)', display: 'flex', flexDirection: 'column', gap: 2 }}>
       {error && <Alert severity="error">{error}</Alert>}
 
-      <SettingsProvider />
+      <SettingsSection title="General">
+        <SettingsProvider />
 
-      {currentProvider?.requiresApiKey && <SettingsApiKey />}
+        {currentProvider?.requiresApiKey && <SettingsApiKey />}
 
-      <SettingsSymbols />
+        <SettingsSymbols />
 
-      <SettingsRefreshInterval />
+        <SettingsRefreshInterval />
+      </SettingsSection>
 
       <Button
         variant="contained"
