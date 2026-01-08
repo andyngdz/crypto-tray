@@ -35,6 +35,7 @@ func main() {
 	var fetcher *price.Fetcher
 	trayManager := tray.New(
 		cfg.Symbols,
+		cfg.NumberFormat,
 		deps.App.ShowWindow,
 		func() { // onRefreshNow
 			fetcher.RefreshNow()
@@ -62,6 +63,12 @@ func main() {
 	deps.App.setOnSymbolsChanged(func(symbols []string) {
 		trayManager.SetSymbols(symbols)
 		fetcher.RefreshNow()
+	})
+
+	// Connect number format changes to tray
+	deps.App.setOnNumberFormatChanged(func(format string) {
+		trayManager.SetNumberFormat(format)
+		fetcher.RefreshNow() // Refresh to update display with new format
 	})
 
 	// Connect manual refresh from frontend

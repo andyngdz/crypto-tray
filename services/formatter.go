@@ -8,8 +8,16 @@ import (
 )
 
 // FormatPrice formats a price with thousand separators and no decimals
-func FormatPrice(price float64) string {
-	p := message.NewPrinter(language.English)
+// format: "us", "european", or "asian"
+func FormatPrice(price float64, format string) string {
+	var lang language.Tag
+	switch format {
+	case "european":
+		lang = language.German
+	default: // "us", "asian", or any other value
+		lang = language.English
+	}
+	p := message.NewPrinter(lang)
 	return p.Sprintf("$%.0f", price)
 }
 

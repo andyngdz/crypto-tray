@@ -13,4 +13,5 @@ type Manager struct {
 	priceSlots     []*systray.MenuItem // Pre-allocated menu item slots
 	symbols        []string            // Currently active coinIDs (maps to slots by index)
 	symbolMap      map[string]string   // coinID -> ticker symbol (e.g., "ethereum" -> "ETH")
+	numberFormat   string              // Number format: "us", "european", or "asian"
 }

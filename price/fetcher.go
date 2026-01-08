@@ -96,21 +96,15 @@ func (f *Fetcher) fetchOnce(ctx context.Context, cfg config.Config) {
 	provider, ok := f.registry.Get(cfg.ProviderID)
 	if !ok {
 		log.Printf("Unknown provider: %s", cfg.ProviderID)
-		if f.callback != nil {
-			f.callback(nil, fmt.Errorf("unknown provider: %s", cfg.ProviderID))
-		}
+		f.callback(nil, fmt.Errorf("unknown provider: %s", cfg.ProviderID))
 		return
 	}
 
 	if len(cfg.Symbols) == 0 {
-		if f.callback != nil {
-			f.callback([]*providers.PriceData{}, nil)
-		}
+		f.callback([]*providers.PriceData{}, nil)
 		return
 	}
 
 	data, err := provider.FetchPrices(ctx, cfg.Symbols)
-	if f.callback != nil {
-		f.callback(data, err)
-	}
+	f.callback(data, err)
 }
