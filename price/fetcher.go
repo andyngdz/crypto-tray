@@ -22,23 +22,26 @@ type Fetcher struct {
 	refreshCh  chan struct{}
 }
 
-// NewFetcher creates a new price fetcher
-func NewFetcher(
+// newFetcher creates a new price fetcher (internal use by Service)
+func newFetcher(
 	registry *providers.Registry,
 	configManager *config.Manager,
-	callback Callback,
 ) *Fetcher {
 	return &Fetcher{
 		registry:      registry,
 		configManager: configManager,
-		callback:      callback,
 		refreshCh:     make(chan struct{}, 1),
 	}
 }
 
-// Start begins the price fetching loop
-func (f *Fetcher) Start() {
+// Start begins the price fetching loop with the given callback
+func (f *Fetcher) Start(callback Callback) {
+	f.mu.Lock()
+	f.callback = callback
+	f.mu.Unlock()
+
 	ctx, cancel := context.WithCancel(context.Background())
+
 	f.mu.Lock()
 	f.cancelFunc = cancel
 	f.mu.Unlock()

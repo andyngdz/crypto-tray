@@ -83,6 +83,8 @@ wails build -tags webkit2_41
 
 - DRY (Don't Repeat Yourself)
 - Type-safe without `any`
+- Use blank lines to separate logical blocks (imports, variable declarations, control flow, return statements)
+- Follow existing patterns in the codebase - check how similar code is written before adding new code
 
 **Frontend**
 

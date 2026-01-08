@@ -6,6 +6,7 @@ export namespace config {
 	    refresh_seconds: number;
 	    symbols: string[];
 	    number_format: string;
+	    display_currency: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -18,6 +19,7 @@ export namespace config {
 	        this.refresh_seconds = source["refresh_seconds"];
 	        this.symbols = source["symbols"];
 	        this.number_format = source["number_format"];
+	        this.display_currency = source["display_currency"];
 	    }
 	}
 
@@ -51,6 +53,8 @@ export namespace providers {
 	    symbol: string;
 	    price: number;
 	    change_24h: number;
+	    convertedPrice: number;
+	    currency: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new PriceData(source);
@@ -62,6 +66,8 @@ export namespace providers {
 	        this.symbol = source["symbol"];
 	        this.price = source["price"];
 	        this.change_24h = source["change_24h"];
+	        this.convertedPrice = source["convertedPrice"];
+	        this.currency = source["currency"];
 	    }
 	}
 	export class SymbolInfo {

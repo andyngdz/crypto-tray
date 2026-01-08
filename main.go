@@ -11,10 +11,9 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
 
+	"crypto-tray/exchange"
 	"crypto-tray/price"
-	"crypto-tray/providers"
 	"crypto-tray/tray"
 )
 
@@ -32,13 +31,14 @@ func main() {
 	cfg := deps.ConfigManager.Get()
 
 	// Create tray manager
-	var fetcher *price.Fetcher
+	var priceService *price.Service
 	trayManager := tray.New(
 		cfg.Symbols,
 		cfg.NumberFormat,
+		cfg.DisplayCurrency,
 		deps.App.ShowWindow,
 		func() { // onRefreshNow
-			fetcher.RefreshNow()
+			priceService.RefreshNow()
 		},
 		func() { // onQuit
 			deps.App.QuitApp()
@@ -46,34 +46,40 @@ func main() {
 		},
 	)
 
-	// Create price fetcher
-	fetcher = price.NewFetcher(deps.Registry, deps.ConfigManager, func(data []*providers.PriceData, err error) {
-		if err != nil {
-			log.Printf("Error fetching price: %v", err)
-			trayManager.SetError(err.Error())
-			return
-		}
-		if len(data) > 0 {
-			trayManager.UpdatePrices(data)
-			runtime.EventsEmit(deps.App.GetContext(), "price:update", data)
-		}
-	})
+	// Create exchange service
+	exchangeService := exchange.NewService(deps.ConfigManager, deps.App)
+	converter := exchangeService.GetConverter()
+
+	// Create price service
+	priceService = price.NewService(
+		deps.Registry,
+		deps.ConfigManager,
+		trayManager,
+		exchangeService.GetConverter(),
+		deps.App,
+	)
 
 	// Connect symbol changes to tray
 	deps.App.setOnSymbolsChanged(func(symbols []string) {
 		trayManager.SetSymbols(symbols)
-		fetcher.RefreshNow()
+		priceService.RefreshNow()
 	})
 
 	// Connect number format changes to tray
 	deps.App.setOnNumberFormatChanged(func(format string) {
 		trayManager.SetNumberFormat(format)
-		fetcher.RefreshNow() // Refresh to update display with new format
+		priceService.RefreshNow() // Refresh to update display with new format
+	})
+
+	// Connect display currency changes to tray
+	deps.App.setOnDisplayCurrencyChanged(func(currency string) {
+		trayManager.SetDisplayCurrency(currency)
+		priceService.RefreshNow() // Refresh to update display with new currency
 	})
 
 	// Connect manual refresh from frontend
 	deps.App.setOnRefreshPrices(func() {
-		fetcher.RefreshNow()
+		priceService.RefreshNow()
 	})
 
 	// Setup systray before Wails starts (shares GTK context)
@@ -97,20 +103,25 @@ func main() {
 		OnStartup: func(ctx context.Context) {
 			deps.App.startup(ctx)
 
+			// Start exchange service first to get rates
+			exchangeService.Start()
+
 			if provider, ok := deps.Registry.Get(cfg.ProviderID); ok {
 				// Preload symbol cache
 				provider.FetchSymbols(ctx)
 
 				// Fetch initial prices synchronously
 				if data, err := provider.FetchPrices(ctx, cfg.Symbols); err == nil && len(data) > 0 {
+					converter.ConvertPrices(data)
 					trayManager.UpdatePrices(data)
 				}
 			}
 
-			fetcher.Start()
+			priceService.Start()
 		},
 		OnShutdown: func(ctx context.Context) {
-			fetcher.Stop()
+			priceService.Stop()
+			exchangeService.Stop()
 		},
 		Bind: []interface{}{
 			deps.App,

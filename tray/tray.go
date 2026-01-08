@@ -14,25 +14,31 @@ import (
 //go:embed icon.png
 var iconData []byte
 
-// New creates a new tray manager with the initial symbols and number format
-func New(symbols []string, numberFormat string, onOpenSettings, onRefreshNow, onQuit func()) *Manager {
+// New creates a new tray manager with the initial symbols, number format, and display currency
+func New(symbols []string, numberFormat string, displayCurrency string, onOpenSettings, onRefreshNow, onQuit func()) *Manager {
 	if len(symbols) == 0 {
 		symbols = []string{"---"}
 	}
 	return &Manager{
-		onOpenSettings: onOpenSettings,
-		onRefreshNow:   onRefreshNow,
-		onQuit:         onQuit,
-		priceSlots:     make([]*systray.MenuItem, 0, maxPriceSlots),
-		symbols:        symbols,
-		symbolMap:      make(map[string]string),
-		numberFormat:   numberFormat,
+		onOpenSettings:  onOpenSettings,
+		onRefreshNow:    onRefreshNow,
+		onQuit:          onQuit,
+		priceSlots:      make([]*systray.MenuItem, 0, maxPriceSlots),
+		symbols:         symbols,
+		symbolMap:       make(map[string]string),
+		numberFormat:    numberFormat,
+		displayCurrency: displayCurrency,
 	}
 }
 
 // SetNumberFormat updates the number format for price display
 func (t *Manager) SetNumberFormat(format string) {
 	t.numberFormat = format
+}
+
+// SetDisplayCurrency updates the display currency for price formatting
+func (t *Manager) SetDisplayCurrency(currency string) {
+	t.displayCurrency = currency
 }
 
 // Setup registers the tray without blocking - use this with Wails
@@ -51,7 +57,7 @@ func (t *Manager) onReady() {
 	systray.SetTooltip("Crypto Tray - Loading...")
 
 	// Pre-allocate menu item slots
-	for i := 0; i < maxPriceSlots; i++ {
+	for range maxPriceSlots {
 		item := systray.AddMenuItem("", "Current price")
 		item.Disable()
 		item.Hide()
@@ -133,7 +139,15 @@ func (t *Manager) UpdatePrices(data []*providers.PriceData) {
 			break
 		}
 		if d, ok := priceMap[coinID]; ok {
-			displayText := fmt.Sprintf("%s %s", d.Symbol, services.FormatPrice(d.Price, t.numberFormat))
+			price := d.ConvertedPrice
+			if price == 0 {
+				price = d.Price
+			}
+			currency := d.Currency
+			if currency == "" {
+				currency = t.displayCurrency
+			}
+			displayText := fmt.Sprintf("%s %s", d.Symbol, services.FormatPriceWithCurrency(price, t.numberFormat, currency))
 			t.priceSlots[i].SetTitle(displayText)
 		}
 	}
@@ -142,7 +156,15 @@ func (t *Manager) UpdatePrices(data []*providers.PriceData) {
 	var titleParts []string
 	for _, coinID := range t.symbols {
 		if d, ok := priceMap[coinID]; ok {
-			titleParts = append(titleParts, fmt.Sprintf("%s %s", d.Symbol, services.FormatPrice(d.Price, t.numberFormat)))
+			price := d.ConvertedPrice
+			if price == 0 {
+				price = d.Price
+			}
+			currency := d.Currency
+			if currency == "" {
+				currency = t.displayCurrency
+			}
+			titleParts = append(titleParts, fmt.Sprintf("%s %s", d.Symbol, services.FormatPriceWithCurrency(price, t.numberFormat, currency)))
 		}
 	}
 	if len(titleParts) > 0 {
