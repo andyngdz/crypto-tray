@@ -33,7 +33,8 @@ func (c *Converter) ConvertPrices(data []*providers.PriceData) {
 		}
 	}
 
-	for _, d := range data {
+	for dataIdx := range data {
+		d := data[dataIdx]
 		d.ConvertedPrice = d.Price * rate
 		d.Currency = currency
 	}

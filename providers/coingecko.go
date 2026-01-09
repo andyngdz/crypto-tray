@@ -80,7 +80,8 @@ func (c *CoinGecko) FetchPrices(ctx context.Context, coinIDs []string) ([]*Price
 	}
 
 	prices := make([]*PriceData, 0, len(coinIDs))
-	for _, coinID := range coinIDs {
+	for coinIdx := range coinIDs {
+		coinID := coinIDs[coinIdx]
 		data, ok := result[coinID]
 		if !ok {
 			continue
@@ -124,7 +125,8 @@ func (c *CoinGecko) FetchSymbols(ctx context.Context) ([]SymbolInfo, error) {
 	symbols := make([]SymbolInfo, 0, len(coins))
 	coinIDMap := make(map[string]SymbolInfo, len(coins))
 
-	for _, coin := range coins {
+	for coinIdx := range coins {
+		coin := coins[coinIdx]
 		info := SymbolInfo{
 			CoinID: coin.ID,
 			Symbol: strings.ToUpper(coin.Symbol),

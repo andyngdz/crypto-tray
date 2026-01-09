@@ -116,8 +116,8 @@ func equalSymbols(a, b []string) bool {
 	if len(a) != len(b) {
 		return false
 	}
-	for i := range a {
-		if a[i] != b[i] {
+	for symbolIdx := range a {
+		if a[symbolIdx] != b[symbolIdx] {
 			return false
 		}
 	}
