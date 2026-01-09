@@ -47,10 +47,7 @@ func (s *Service) Start() {
 		if len(data) > 0 {
 			s.converter.ConvertPrices(data)
 			s.tray.UpdatePrices(data)
-
-			if s.contextProvider != nil {
-				runtime.EventsEmit(s.contextProvider.GetContext(), "price:update", data)
-			}
+			runtime.EventsEmit(s.contextProvider.GetContext(), "price:update", data)
 		}
 	})
 }

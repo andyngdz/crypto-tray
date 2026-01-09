@@ -35,9 +35,7 @@ func (s *Service) Start() {
 			return
 		}
 
-		if s.contextProvider != nil {
-			runtime.EventsEmit(s.contextProvider.GetContext(), "exchange:update", rates)
-		}
+		runtime.EventsEmit(s.contextProvider.GetContext(), "exchange:update", rates)
 	})
 }
 
