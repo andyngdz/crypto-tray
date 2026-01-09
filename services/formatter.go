@@ -20,12 +20,6 @@ func GetCurrencySymbol(currencyCode string) string {
 	return fmt.Sprint(currency.Symbol(unit))
 }
 
-// FormatPrice formats a price with thousand separators and no decimals
-// format: "us", "european", or "asian"
-func FormatPrice(price float64, format string) string {
-	return FormatPriceWithCurrency(price, format, "usd")
-}
-
 // FormatPriceWithCurrency formats a price with the specified currency symbol
 func FormatPriceWithCurrency(price float64, format string, currency string) string {
 	var lang language.Tag

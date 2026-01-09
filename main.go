@@ -35,7 +35,6 @@ func main() {
 	trayManager := tray.New(
 		cfg.Symbols,
 		cfg.NumberFormat,
-		cfg.DisplayCurrency,
 		deps.App.ShowWindow,
 		func() { // onRefreshNow
 			priceService.RefreshNow()
@@ -71,9 +70,8 @@ func main() {
 		priceService.RefreshNow() // Refresh to update display with new format
 	})
 
-	// Connect display currency changes to tray
+	// Connect display currency changes
 	deps.App.setOnDisplayCurrencyChanged(func(currency string) {
-		trayManager.SetDisplayCurrency(currency)
 		priceService.RefreshNow() // Refresh to update display with new currency
 	})
 

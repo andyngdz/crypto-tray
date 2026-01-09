@@ -85,6 +85,7 @@ wails build -tags webkit2_41
 - Type-safe without `any`
 - Use blank lines to separate logical blocks (imports, variable declarations, control flow, return statements)
 - Follow existing patterns in the codebase - check how similar code is written before adding new code
+- Only add defensive code (nil checks, empty checks, fallbacks) when necessary - trace the data flow to verify the check is actually needed
 
 **Frontend**
 
