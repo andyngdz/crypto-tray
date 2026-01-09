@@ -51,7 +51,7 @@ func (t *Manager) onReady() {
 	systray.SetTooltip("Crypto Tray - Loading...")
 
 	// Pre-allocate menu item slots
-	for i := 0; i < maxPriceSlots; i++ {
+	for range maxPriceSlots {
 		item := systray.AddMenuItem("", "Current price")
 		item.Disable()
 		item.Hide()
@@ -133,7 +133,11 @@ func (t *Manager) UpdatePrices(data []*providers.PriceData) {
 			break
 		}
 		if d, ok := priceMap[coinID]; ok {
-			displayText := fmt.Sprintf("%s %s", d.Symbol, services.FormatPrice(d.Price, t.numberFormat))
+			price := d.ConvertedPrice
+			if price == 0 {
+				price = d.Price
+			}
+			displayText := fmt.Sprintf("%s %s", d.Symbol, services.FormatPriceWithCurrency(price, t.numberFormat, d.Currency))
 			t.priceSlots[i].SetTitle(displayText)
 		}
 	}
@@ -142,7 +146,11 @@ func (t *Manager) UpdatePrices(data []*providers.PriceData) {
 	var titleParts []string
 	for _, coinID := range t.symbols {
 		if d, ok := priceMap[coinID]; ok {
-			titleParts = append(titleParts, fmt.Sprintf("%s %s", d.Symbol, services.FormatPrice(d.Price, t.numberFormat)))
+			price := d.ConvertedPrice
+			if price == 0 {
+				price = d.Price
+			}
+			titleParts = append(titleParts, fmt.Sprintf("%s %s", d.Symbol, services.FormatPriceWithCurrency(price, t.numberFormat, d.Currency)))
 		}
 	}
 	if len(titleParts) > 0 {
