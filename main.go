@@ -13,6 +13,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 
 	"crypto-tray/exchange"
+	"crypto-tray/movement"
 	"crypto-tray/price"
 	"crypto-tray/tray"
 )
@@ -49,6 +50,9 @@ func main() {
 	exchangeService := exchange.NewService(deps.ConfigManager, deps.App)
 	converter := exchangeService.GetConverter()
 
+	// Create movement tracker
+	movementTracker := movement.NewTracker()
+
 	// Create price service
 	priceService = price.NewService(
 		deps.Registry,
@@ -56,6 +60,7 @@ func main() {
 		trayManager,
 		exchangeService.GetConverter(),
 		deps.App,
+		movementTracker,
 	)
 
 	// Connect symbol changes to tray
@@ -111,7 +116,8 @@ func main() {
 				// Fetch initial prices synchronously
 				if data, err := provider.FetchPrices(ctx, cfg.Symbols); err == nil && len(data) > 0 {
 					converter.ConvertPrices(data)
-					trayManager.UpdatePrices(data)
+					movements := movementTracker.Track(data)
+					trayManager.UpdatePrices(data, movements)
 				}
 			}
 

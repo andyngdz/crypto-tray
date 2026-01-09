@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"crypto-tray/movement"
 	"crypto-tray/providers"
 	"crypto-tray/services"
 
@@ -91,9 +92,10 @@ func (t *Manager) onExit() {
 // updateSlots syncs the pre-allocated slots with current symbols
 func (t *Manager) updateSlots() {
 	displaySymbols := t.getDisplaySymbols()
-	for i, slot := range t.priceSlots {
-		if i < len(t.symbols) {
-			slot.SetTitle(fmt.Sprintf("%s $--,---", displaySymbols[i]))
+	for slotIdx := range t.priceSlots {
+		slot := t.priceSlots[slotIdx]
+		if slotIdx < len(t.symbols) {
+			slot.SetTitle(fmt.Sprintf("%s $--,---", displaySymbols[slotIdx]))
 			slot.Show()
 		} else {
 			slot.Hide()
@@ -104,53 +106,65 @@ func (t *Manager) updateSlots() {
 // getDisplaySymbols converts coinIDs to ticker symbols for display
 func (t *Manager) getDisplaySymbols() []string {
 	result := make([]string, len(t.symbols))
-	for i, coinID := range t.symbols {
+	for symbolIdx := range t.symbols {
+		coinID := t.symbols[symbolIdx]
 		if symbol, ok := t.symbolMap[coinID]; ok {
-			result[i] = symbol
+			result[symbolIdx] = symbol
 		} else {
-			result[i] = strings.ToUpper(coinID)
+			result[symbolIdx] = strings.ToUpper(coinID)
 		}
 	}
 	return result
 }
 
-// UpdatePrices updates the tray display with multiple price data
-func (t *Manager) UpdatePrices(data []*providers.PriceData) {
+// UpdatePrices updates the tray display with multiple price data and movement indicators
+func (t *Manager) UpdatePrices(data []*providers.PriceData, movements map[string]movement.Direction) {
 	if len(data) == 0 {
 		return
 	}
 
 	// Build a map for quick lookup by coinID and update symbolMap
 	priceMap := make(map[string]*providers.PriceData)
-	for _, d := range data {
+	for dataIdx := range data {
+		d := data[dataIdx]
 		priceMap[d.CoinID] = d
 		t.symbolMap[d.CoinID] = d.Symbol
 	}
 
-	// Update each slot with its coinID's price
-	for i, coinID := range t.symbols {
-		if i >= len(t.priceSlots) {
+	// Update each slot with its coinID's price and movement indicator
+	for symbolIdx := range t.symbols {
+		if symbolIdx >= len(t.priceSlots) {
 			break
 		}
+		coinID := t.symbols[symbolIdx]
 		if d, ok := priceMap[coinID]; ok {
 			price := d.ConvertedPrice
 			if price == 0 {
 				price = d.Price
 			}
-			displayText := fmt.Sprintf("%s %s", d.Symbol, services.FormatPriceWithCurrency(price, t.numberFormat, d.Currency))
-			t.priceSlots[i].SetTitle(displayText)
+			indicator := movement.IndicatorNeutral
+			if dir, ok := movements[coinID]; ok {
+				indicator = dir.Indicator()
+			}
+			displayText := fmt.Sprintf("%s %s %s", indicator, d.Symbol, services.FormatPriceWithCurrency(price, t.numberFormat, d.Currency))
+			t.priceSlots[symbolIdx].SetTitle(displayText)
 		}
 	}
 
-	// Update tray title with all currencies
+	// Update tray title with all currencies and movement indicators
 	var titleParts []string
-	for _, coinID := range t.symbols {
+	for symbolIdx := range t.symbols {
+		coinID := t.symbols[symbolIdx]
 		if d, ok := priceMap[coinID]; ok {
 			price := d.ConvertedPrice
 			if price == 0 {
 				price = d.Price
 			}
-			titleParts = append(titleParts, fmt.Sprintf("%s %s", d.Symbol, services.FormatPriceWithCurrency(price, t.numberFormat, d.Currency)))
+			indicator := movement.IndicatorNeutral
+			if dir, ok := movements[coinID]; ok {
+				indicator = dir.Indicator()
+			}
+			titleParts = append(titleParts, fmt.Sprintf("%s %s %s", indicator, d.Symbol, services.FormatPriceWithCurrency(price, t.numberFormat, d.Currency)))
 		}
 	}
 	if len(titleParts) > 0 {
@@ -167,11 +181,11 @@ func (t *Manager) SetError(msg string) {
 		systray.SetTitle(services.FormatTrayTitle(displaySymbols, "$???"))
 	}
 	systray.SetTooltip("Error: " + msg)
-	for i := range t.symbols {
-		if i >= len(t.priceSlots) {
+	for symbolIdx := range t.symbols {
+		if symbolIdx >= len(t.priceSlots) {
 			break
 		}
-		t.priceSlots[i].SetTitle(fmt.Sprintf("%s Error", displaySymbols[i]))
+		t.priceSlots[symbolIdx].SetTitle(fmt.Sprintf("%s Error", displaySymbols[symbolIdx]))
 	}
 }
 

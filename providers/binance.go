@@ -89,12 +89,14 @@ func (b *Binance) FetchPrices(ctx context.Context, coinIDs []string) ([]*PriceDa
 
 	// Build response map for quick lookup
 	tickerMap := make(map[string]binanceTicker24hr)
-	for _, t := range tickers {
+	for tickerIdx := range tickers {
+		t := tickers[tickerIdx]
 		tickerMap[t.Symbol] = t
 	}
 
 	prices := make([]*PriceData, 0, len(coinIDs))
-	for _, coinID := range coinIDs {
+	for coinIdx := range coinIDs {
+		coinID := coinIDs[coinIdx]
 		ticker, ok := tickerMap[coinID]
 		if !ok {
 			continue
@@ -147,7 +149,8 @@ func (b *Binance) FetchSymbols(ctx context.Context) ([]SymbolInfo, error) {
 	coinIDMap := make(map[string]SymbolInfo)
 	seen := make(map[string]bool)
 
-	for _, s := range info.Symbols {
+	for symbolIdx := range info.Symbols {
+		s := info.Symbols[symbolIdx]
 		// Only include USDT pairs that are actively trading
 		if s.QuoteAsset != binanceQuoteAsset || s.Status != "TRADING" {
 			continue
@@ -159,13 +162,13 @@ func (b *Binance) FetchSymbols(ctx context.Context) ([]SymbolInfo, error) {
 		}
 		seen[s.BaseAsset] = true
 
-		info := SymbolInfo{
+		symbolInfo := SymbolInfo{
 			CoinID: s.Symbol,
 			Symbol: s.BaseAsset,
 			Name:   s.BaseAsset,
 		}
-		symbols = append(symbols, info)
-		coinIDMap[s.Symbol] = info
+		symbols = append(symbols, symbolInfo)
+		coinIDMap[s.Symbol] = symbolInfo
 	}
 
 	// Update cache

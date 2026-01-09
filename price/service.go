@@ -15,6 +15,7 @@ type Service struct {
 	tray            TrayUpdater
 	converter       PriceConverter
 	contextProvider ContextProvider
+	movementTracker MovementTracker
 }
 
 // NewService creates a new price service
@@ -24,6 +25,7 @@ func NewService(
 	tray TrayUpdater,
 	converter PriceConverter,
 	contextProvider ContextProvider,
+	movementTracker MovementTracker,
 ) *Service {
 	fetcher := newFetcher(registry, configManager)
 
@@ -32,6 +34,7 @@ func NewService(
 		tray:            tray,
 		converter:       converter,
 		contextProvider: contextProvider,
+		movementTracker: movementTracker,
 	}
 }
 
@@ -46,7 +49,8 @@ func (s *Service) Start() {
 
 		if len(data) > 0 {
 			s.converter.ConvertPrices(data)
-			s.tray.UpdatePrices(data)
+			movements := s.movementTracker.Track(data)
+			s.tray.UpdatePrices(data, movements)
 			runtime.EventsEmit(s.contextProvider.GetContext(), "price:update", data)
 		}
 	})

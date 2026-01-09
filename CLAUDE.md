@@ -87,6 +87,11 @@ wails build -tags webkit2_41
 - Follow existing patterns in the codebase - check how similar code is written before adding new code
 - Only add defensive code (nil checks, empty checks, fallbacks) when necessary - trace the data flow to verify the check is actually needed
 
+**Go**
+
+- Avoid `for _, item := range` on slices/arrays - use `for idx := range` and access `arr[idx]` instead (exception: maps don't have meaningful indices, so `for _, value := range` is acceptable)
+- Use meaningful index names instead of `i` (e.g., `symbolIdx`, `slotIdx`, `coinIdx`)
+
 **Frontend**
 
 - Modular design - separate presentation components from logic (hooks)
