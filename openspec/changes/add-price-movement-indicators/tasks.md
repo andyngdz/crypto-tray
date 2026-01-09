@@ -29,7 +29,7 @@
 ## 5. Verification
 
 - [x] 5.1 Build succeeds with `wails build -tags webkit2_41`
-- [ ] 5.2 Run `wails dev -tags webkit2_41` - app starts successfully
-- [ ] 5.3 Verify first fetch shows ⚪ (neutral) indicators
-- [ ] 5.4 Wait for refresh, verify 🟢/🔴 indicators appear for changed prices
-- [ ] 5.5 Restart app, verify indicators reset to ⚪
+- [x] 5.2 Run `wails dev -tags webkit2_41` - app starts successfully
+- [x] 5.3 Verify first fetch shows ⚪ (neutral) indicators
+- [x] 5.4 Wait for refresh, verify 🟢/🔴 indicators appear for changed prices
+- [x] 5.5 Restart app, verify indicators reset to ⚪
