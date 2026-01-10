@@ -1,6 +1,7 @@
 import { Alert, Box, Button } from '@mui/material'
 
 import { SettingsApiKey } from '@/features/settings/presentations/SettingsApiKey'
+import { SettingsFiatCurrency } from '@/features/settings/presentations/SettingsFiatCurrency'
 import { SettingsNumberFormat } from '@/features/settings/presentations/SettingsNumberFormat'
 import { SettingsProvider } from '@/features/settings/presentations/SettingsProvider'
 import { SettingsRefreshInterval } from '@/features/settings/presentations/SettingsRefreshInterval'
@@ -24,6 +25,8 @@ export function SettingsView() {
         {currentProvider?.requiresApiKey && <SettingsApiKey />}
 
         <SettingsSymbols />
+
+        <SettingsFiatCurrency />
 
         <SettingsRefreshInterval />
       </SettingsSection>
