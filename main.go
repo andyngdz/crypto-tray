@@ -11,6 +11,7 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/linux"
 
 	"crypto-tray/exchange"
 	"crypto-tray/movement"
@@ -20,6 +21,9 @@ import (
 
 //go:embed all:frontend/dist
 var assets embed.FS
+
+//go:embed frontend/src/assets/images/logo.png
+var windowIcon []byte
 
 func main() {
 	// Initialize all dependencies
@@ -90,11 +94,15 @@ func main() {
 
 	// Run Wails in main goroutine (GTK requires main thread)
 	err = wails.Run(&options.App{
-		Title:     "Crypto Tray Settings",
+		Title:     "CryptoTray",
 		Width:     640,
 		Height:    800,
 		MinWidth:  640,
 		MinHeight: 600,
+		Linux: &linux.Options{
+			Icon:        windowIcon,
+			ProgramName: "CryptoTray",
+		},
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
