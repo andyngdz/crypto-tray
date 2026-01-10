@@ -4,6 +4,7 @@ export interface Config {
   refresh_seconds: number
   symbols: string[]
   number_format: string
+  display_currency: string
 }
 
 export interface ProviderInfo {
@@ -28,7 +29,8 @@ export function isConfig(obj: unknown): obj is Config {
     Array.isArray(c.symbols) &&
     typeof c.api_keys === 'object' &&
     c.api_keys !== null &&
-    typeof c.number_format === 'string'
+    typeof c.number_format === 'string' &&
+    typeof c.display_currency === 'string'
   )
 }
 

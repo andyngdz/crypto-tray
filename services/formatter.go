@@ -17,7 +17,7 @@ func GetCurrencySymbol(currencyCode string) string {
 		return strings.ToUpper(currencyCode)
 	}
 
-	return fmt.Sprint(currency.Symbol(unit))
+	return fmt.Sprint(currency.NarrowSymbol(unit))
 }
 
 // FormatPriceWithCurrency formats a price with the specified currency symbol
