@@ -30,6 +30,6 @@
 
 - [x] 6.1 Run `wails build -tags webkit2_41` to verify compilation
 - [x] 6.2 Verify Binance API responds correctly
-- [ ] 6.3 Manual testing: Run app and test provider selection in Settings
-- [ ] 6.4 Manual testing: Verify prices display with 24h change
-- [ ] 6.5 Manual testing: Verify provider switch resets to BTC default
+- [x] 6.3 Manual testing: Run app and test provider selection in Settings
+- [x] 6.4 Manual testing: Verify prices display with 24h change
+- [x] 6.5 Manual testing: Verify provider switch resets to BTC default

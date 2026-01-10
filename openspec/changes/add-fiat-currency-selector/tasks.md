@@ -14,5 +14,5 @@
 - [x] 4.2 Add `SettingsFiatCurrency` to `SettingsView.tsx` below `SettingsSymbols`
 
 ## 5. Verification
-- [ ] 5.1 Run `wails dev -tags webkit2_41` and verify dropdown appears
-- [ ] 5.2 Test selecting different currencies and verify tray prices update
+- [x] 5.1 Run `wails dev -tags webkit2_41` and verify dropdown appears
+- [x] 5.2 Test selecting different currencies and verify tray prices update
