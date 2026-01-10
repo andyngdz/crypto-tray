@@ -9,10 +9,14 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/linux"
 )
 
 //go:embed all:frontend/dist
 var assets embed.FS
+
+//go:embed frontend/src/assets/images/logo.png
+var windowIcon []byte
 
 func main() {
 	deps, err := InitApp()
@@ -21,9 +25,13 @@ func main() {
 	}
 
 	err = wails.Run(&options.App{
-		Title:  "Crypto Tray Settings",
+		Title:  "CryptoTray",
 		Width:  500,
 		Height: 400,
+		Linux: &linux.Options{
+			Icon:        windowIcon,
+			ProgramName: "CryptoTray",
+		},
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
