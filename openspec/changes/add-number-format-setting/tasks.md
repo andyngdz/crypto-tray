@@ -35,6 +35,6 @@
 - [x] 7.4 Add "Formatting" section to `SettingsView.tsx`
 
 ## 8. Verification
-- [ ] 8.1 Run `wails dev -tags webkit2_41` and verify dropdown appears
-- [ ] 8.2 Select European format and verify tray updates (e.g., `$97.000`)
-- [ ] 8.3 Test format persistence (change, close, reopen)
+- [x] 8.1 Run `wails dev -tags webkit2_41` and verify dropdown appears
+- [x] 8.2 Select European format and verify tray updates (e.g., `$97.000`)
+- [x] 8.3 Test format persistence (change, close, reopen)
