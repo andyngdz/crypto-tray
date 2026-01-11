@@ -153,8 +153,6 @@ jobs:
           chmod +x appimagetool
 
       - name: Build .AppImage
-        env:
-          ARCH: ${{ matrix.arch == 'amd64' && 'x86_64' || 'aarch64' }}
         run: |
           mkdir -p AppDir/usr/bin
           mkdir -p AppDir/usr/share/applications
@@ -173,7 +171,8 @@ jobs:
           EOF
           chmod +x AppDir/AppRun
 
-          ./appimagetool AppDir build/bin/${{ env.APP_NAME }}-linux-${{ matrix.arch }}.AppImage
+          export ARCH=${{ matrix.arch == 'amd64' && 'x86_64' || 'aarch64' }}
+          ./appimagetool --appimage-extract-and-run AppDir build/bin/${{ env.APP_NAME }}-linux-${{ matrix.arch }}.AppImage
 
       - name: Rename binary
         run: mv build/bin/${{ env.APP_NAME }} build/bin/${{ env.APP_NAME }}-linux-${{ matrix.arch }}
