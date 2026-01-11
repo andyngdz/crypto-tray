@@ -53,4 +53,4 @@ require (
 	golang.org/x/sys v0.39.0 // indirect
 )
 
-// replace github.com/wailsapp/wails/v2 v2.11.0 => /home/andy/go/pkg/mod
+replace github.com/getlantern/systray => ./internal/systray
