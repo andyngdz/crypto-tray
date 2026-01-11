@@ -171,7 +171,7 @@ jobs:
           EOF
           chmod +x AppDir/AppRun
 
-          export ARCH=${{ matrix.arch == 'amd64' && 'x86_64' || 'aarch64' }}
+          export ARCH=${{ matrix.arch == 'amd64' && 'x86_64' || 'arm_aarch64' }}
           ./appimagetool --appimage-extract-and-run AppDir build/bin/${{ env.APP_NAME }}-linux-${{ matrix.arch }}.AppImage
 
       - name: Rename binary
