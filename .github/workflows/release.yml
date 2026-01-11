@@ -267,7 +267,9 @@ jobs:
           version: ${{ env.PNPM_VERSION }}
 
       - name: Install NSIS
-        run: choco install nsis -y
+        run: |
+          choco install nsis -y
+          echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
 
       - name: Install Wails CLI
         run: go install github.com/wailsapp/wails/v2/cmd/wails@${{ env.WAILS_VERSION }}
@@ -278,6 +280,10 @@ jobs:
 
       - name: Build for Windows amd64 with NSIS installer
         run: wails build -platform windows/amd64 -nsis -trimpath -clean
+
+      - name: List build output
+        shell: pwsh
+        run: Get-ChildItem -Path build/bin -Recurse
 
       - name: Rename artifacts
         shell: pwsh
