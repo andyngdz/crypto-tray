@@ -38,10 +38,14 @@ jobs:
 
   build-linux:
     needs: [get-version]
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: [amd64, arm64]
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -73,13 +77,6 @@ jobs:
             rpm \
             libfuse2
 
-      - name: Install cross-compilation tools (arm64)
-        if: matrix.arch == 'arm64'
-        run: |
-          sudo apt-get install -y \
-            gcc-aarch64-linux-gnu \
-            g++-aarch64-linux-gnu
-
       - name: Install Wails CLI
         run: go install github.com/wailsapp/wails/v2/cmd/wails@${{ env.WAILS_VERSION }}
 
@@ -88,11 +85,6 @@ jobs:
         working-directory: frontend
 
       - name: Build for Linux ${{ matrix.arch }}
-        env:
-          CGO_ENABLED: 1
-          GOOS: linux
-          GOARCH: ${{ matrix.arch }}
-          CC: ${{ matrix.arch == 'arm64' && 'aarch64-linux-gnu-gcc' || 'gcc' }}
         run: wails build -platform linux/${{ matrix.arch }} -tags webkit2_41 -trimpath -clean
 
       - name: Create tar.gz archive
