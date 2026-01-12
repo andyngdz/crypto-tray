@@ -48,8 +48,6 @@ func (t *Manager) onReady() {
 	systray.SetTooltip("Crypto Tray - Loading...")
 
 	// Pre-allocate menu item slots
-	// Note: Items are NOT disabled to preserve icon colors on Windows
-	// (disabled items render icons in greyscale)
 	for range maxPriceSlots {
 		item := systray.AddMenuItem("", "Current price")
 		item.Hide()
