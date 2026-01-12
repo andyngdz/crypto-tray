@@ -60,11 +60,11 @@ func NewBinance() *Binance {
 	}
 }
 
-func (b *Binance) ID() string            { return "binance" }
-func (b *Binance) Name() string          { return "Binance" }
-func (b *Binance) RequiresAPIKey() bool  { return false }
-func (b *Binance) SetAPIKey(key string)  {}
-func (b *Binance) DefaultCoinID() string { return "BTCUSDT" }
+func (b *Binance) ID() string               { return "binance" }
+func (b *Binance) Name() string             { return "Binance" }
+func (b *Binance) RequiresAPIKey() bool     { return false }
+func (b *Binance) SetAPIKey(key string)     {}
+func (b *Binance) DefaultCoinIDs() []string { return []string{"BTCUSDT", "ETHUSDT", "SOLUSDT"} }
 
 // FetchPrices retrieves prices for multiple cryptocurrencies by coinID (trading pair)
 func (b *Binance) FetchPrices(ctx context.Context, coinIDs []string) ([]*PriceData, error) {

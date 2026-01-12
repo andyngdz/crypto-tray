@@ -75,7 +75,7 @@ func (a *App) SaveConfig(cfg config.Config) error {
 	if oldCfg.ProviderID != cfg.ProviderID {
 		newProvider, ok := a.registry.Get(cfg.ProviderID)
 		if ok {
-			cfg.Symbols = []string{newProvider.DefaultCoinID()}
+			cfg.Symbols = newProvider.DefaultCoinIDs()
 		}
 	}
 
