@@ -13,7 +13,7 @@ env:
   NODE_VERSION: "20"
   PNPM_VERSION: "9"
   WAILS_VERSION: "v2.11.0"
-  APP_NAME: "crypto-tray"
+  APP_NAME: "CryptoTray"
 
 jobs:
   get-version:

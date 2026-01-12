@@ -22,6 +22,6 @@ type Provider interface {
 	// SetAPIKey configures the provider's API key
 	SetAPIKey(key string)
 
-	// DefaultCoinID returns the provider's default coin ID (e.g., "bitcoin" or "BTCUSDT")
-	DefaultCoinID() string
+	// DefaultCoinIDs returns the provider's default coin IDs (e.g., ["bitcoin", "ethereum"] or ["BTCUSDT", "ETHUSDT"])
+	DefaultCoinIDs() []string
 }

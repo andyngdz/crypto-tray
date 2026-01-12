@@ -36,10 +36,10 @@ type CoinGecko struct {
 	httpClient *services.HTTPClient
 
 	// Symbol cache
-	cacheMu    sync.RWMutex
-	symbols    []SymbolInfo
-	coinIDMap  map[string]SymbolInfo // keyed by coinID for reverse lookup
-	cacheTime  time.Time
+	cacheMu   sync.RWMutex
+	symbols   []SymbolInfo
+	coinIDMap map[string]SymbolInfo // keyed by coinID for reverse lookup
+	cacheTime time.Time
 }
 
 // NewCoinGecko creates a new CoinGecko provider
@@ -53,10 +53,10 @@ func NewCoinGecko() *CoinGecko {
 	}
 }
 
-func (c *CoinGecko) ID() string           { return "coingecko" }
-func (c *CoinGecko) Name() string         { return "CoinGecko" }
-func (c *CoinGecko) RequiresAPIKey() bool { return false }
-func (c *CoinGecko) DefaultCoinID() string { return "bitcoin" }
+func (c *CoinGecko) ID() string               { return "coingecko" }
+func (c *CoinGecko) Name() string             { return "CoinGecko" }
+func (c *CoinGecko) RequiresAPIKey() bool     { return false }
+func (c *CoinGecko) DefaultCoinIDs() []string { return []string{"bitcoin", "ethereum", "solana"} }
 
 func (c *CoinGecko) SetAPIKey(key string) {
 	c.httpClient.SetAPIKey(key)
@@ -69,8 +69,8 @@ func (c *CoinGecko) FetchPrices(ctx context.Context, coinIDs []string) ([]*Price
 	}
 
 	query := map[string]string{
-		"ids":                  strings.Join(coinIDs, ","),
-		"vs_currencies":        coingeckoCurrency,
+		"ids":                 strings.Join(coinIDs, ","),
+		"vs_currencies":       coingeckoCurrency,
 		"include_24hr_change": "true",
 	}
 

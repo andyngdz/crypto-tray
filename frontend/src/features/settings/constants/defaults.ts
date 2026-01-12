@@ -2,7 +2,7 @@
 export const CONFIG_DEFAULTS = {
   numberFormat: 'us',
   refreshSeconds: 15,
-  providerId: 'coingecko',
+  providerId: 'binance',
   displayCurrency: 'usd',
   autoStart: true,
 } as const

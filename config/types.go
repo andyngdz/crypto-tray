@@ -5,13 +5,12 @@ const (
 	MinRefreshSeconds      = 10
 	MaxRefreshSeconds      = 3600
 	DefaultRefreshSeconds  = 15
-	DefaultSymbol          = "bitcoin"
-	DefaultProviderID      = "coingecko"
+	DefaultProviderID      = "binance"
 	DefaultNumberFormat    = "us"
 	DefaultDisplayCurrency = "usd"
 	DefaultAutoStart       = true
 	configFileName         = "config.json"
-	appDirName             = "crypto-tray"
+	appDirName             = "CryptoTray"
 )
 
 // Config holds the application configuration
@@ -30,7 +29,7 @@ func defaultConfig() *Config {
 		ProviderID:      DefaultProviderID,
 		APIKeys:         make(map[string]string),
 		RefreshSeconds:  DefaultRefreshSeconds,
-		Symbols:         []string{DefaultSymbol},
+		Symbols:         []string{"BTCUSDT", "ETHUSDT", "SOLUSDT"},
 		NumberFormat:    DefaultNumberFormat,
 		DisplayCurrency: DefaultDisplayCurrency,
 		AutoStart:       DefaultAutoStart,
