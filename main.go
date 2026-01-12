@@ -94,14 +94,14 @@ func main() {
 
 	// Run Wails in main goroutine (GTK requires main thread)
 	err = wails.Run(&options.App{
-		Title:     "CryptoTray",
+		Title:     "Crypto Tray",
 		Width:     640,
 		Height:    800,
 		MinWidth:  640,
 		MinHeight: 600,
 		Linux: &linux.Options{
 			Icon:        windowIcon,
-			ProgramName: "CryptoTray",
+			ProgramName: "Crypto Tray",
 		},
 		AssetServer: &assetserver.Options{
 			Assets: assets,

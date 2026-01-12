@@ -42,7 +42,7 @@ func FormatTrayTitle(symbols []string, suffix string) string {
 	}
 	parts := make([]string, len(symbols))
 	for i, symbol := range symbols {
-		parts[i] = symbol + " " + suffix
+		parts[i] = fmt.Sprintf("%s %s", symbol, suffix)
 	}
 	return strings.Join(parts, " | ")
 }
