@@ -7,7 +7,7 @@ import (
 
 	"crypto-tray/movement"
 
-	"fyne.io/systray"
+	"crypto-tray/internal/systray"
 )
 
 // updatePriceSlot updates a menu item with price and movement indicator

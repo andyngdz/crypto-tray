@@ -1,6 +1,6 @@
 package tray
 
-import "fyne.io/systray"
+import "crypto-tray/internal/systray"
 
 // maxPriceSlots is the maximum number of currency slots in the tray menu
 const maxPriceSlots = 10

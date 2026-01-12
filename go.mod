@@ -3,10 +3,11 @@ module crypto-tray
 go 1.24.0
 
 require (
-	fyne.io/systray v1.11.0
 	github.com/emersion/go-autostart v0.0.0-20250403115856-34830d6457d2
+	github.com/godbus/dbus/v5 v5.1.0
 	github.com/imroc/req/v3 v3.57.0
 	github.com/wailsapp/wails/v2 v2.11.0
+	golang.org/x/sys v0.39.0
 	golang.org/x/text v0.32.0
 )
 
@@ -14,7 +15,6 @@ require (
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
-	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
@@ -43,5 +43,4 @@ require (
 	github.com/wailsapp/mimetype v1.4.1 // indirect
 	golang.org/x/crypto v0.46.0 // indirect
 	golang.org/x/net v0.48.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
 )
