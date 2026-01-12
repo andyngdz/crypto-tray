@@ -6,6 +6,7 @@ import (
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 
+	"crypto-tray/autostart"
 	"crypto-tray/config"
 	"crypto-tray/providers"
 )
@@ -92,6 +93,10 @@ func (a *App) SaveConfig(cfg config.Config) error {
 	// Notify if display currency changed
 	if oldCfg.DisplayCurrency != cfg.DisplayCurrency {
 		a.onDisplayCurrencyChanged(cfg.DisplayCurrency)
+	}
+	// Sync auto-start with OS if setting changed
+	if oldCfg.AutoStart != cfg.AutoStart {
+		autostart.SetEnabled(cfg.AutoStart)
 	}
 	return nil
 }

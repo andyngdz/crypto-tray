@@ -1,6 +1,6 @@
 package tray
 
-import "github.com/getlantern/systray"
+import "fyne.io/systray"
 
 // maxPriceSlots is the maximum number of currency slots in the tray menu
 const maxPriceSlots = 10

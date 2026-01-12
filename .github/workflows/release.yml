@@ -274,6 +274,8 @@ jobs:
         working-directory: frontend
 
       - name: Build for Windows amd64 with NSIS installer
+        env:
+          CGO_ENABLED: 1
         run: wails build -platform windows/amd64 -nsis -trimpath -clean
 
       - name: List build output

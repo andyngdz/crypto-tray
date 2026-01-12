@@ -1,0 +1,11 @@
+## 1. Implementation
+- [x] 1.1 Remove `internal/systray/` folder
+- [x] 1.2 Add `fyne.io/systray` to go.mod dependencies
+- [x] 1.3 Update import in `tray/tray.go` from `github.com/getlantern/systray` to `fyne.io/systray`
+- [x] 1.4 Update import in `tray/tray_windows.go`
+- [x] 1.5 Update import in `tray/tray_other.go`
+- [x] 1.6 Update import in `tray/types.go`
+- [x] 1.7 Regenerate ICO files with transparent backgrounds
+- [x] 1.8 Run `go mod tidy` to clean up dependencies
+- [x] 1.9 Test build on Windows
+- [ ] 1.10 Test application to verify transparent icons work correctly

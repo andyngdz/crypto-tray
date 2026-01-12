@@ -4,4 +4,5 @@ export const CONFIG_DEFAULTS = {
   refreshSeconds: 15,
   providerId: 'coingecko',
   displayCurrency: 'usd',
+  autoStart: true,
 } as const
