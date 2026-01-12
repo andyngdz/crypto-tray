@@ -45,7 +45,7 @@ func (t *Manager) Run() {
 func (t *Manager) onReady() {
 	systray.SetIcon(iconData)
 	systray.SetTitle(services.FormatTrayTitle(t.getDisplaySymbols(), "$--,---"))
-	systray.SetTooltip("Crypto Tray - Loading...")
+	systray.SetTooltip("Loading...")
 
 	// Pre-allocate menu item slots
 	for range maxPriceSlots {
@@ -167,7 +167,7 @@ func (t *Manager) UpdatePrices(data []*providers.PriceData, movements map[string
 	if len(titleParts) > 0 {
 		title := strings.Join(titleParts, " | ")
 		systray.SetTitle(title)
-		systray.SetTooltip("Crypto Tray - " + title)
+		systray.SetTooltip(title)
 	}
 }
 
@@ -177,7 +177,7 @@ func (t *Manager) SetError(msg string) {
 	if len(t.symbols) > 0 {
 		systray.SetTitle(services.FormatTrayTitle(displaySymbols, "$???"))
 	}
-	systray.SetTooltip("Error: " + msg)
+	systray.SetTooltip(fmt.Sprintf("Error: %s", msg))
 	for symbolIdx := range t.symbols {
 		if symbolIdx >= len(t.priceSlots) {
 			break
@@ -191,7 +191,7 @@ func (t *Manager) SetLoading() {
 	if len(t.symbols) > 0 {
 		systray.SetTitle(services.FormatTrayTitle(t.getDisplaySymbols(), "..."))
 	}
-	systray.SetTooltip("Crypto Tray - Loading...")
+	systray.SetTooltip("Loading...")
 }
 
 // SetSymbols updates the tracked currencies
