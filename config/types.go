@@ -11,7 +11,7 @@ const (
 	DefaultDisplayCurrency = "usd"
 	DefaultAutoStart       = true
 	configFileName         = "config.json"
-	appDirName             = "crypto-tray"
+	appDirName             = "CryptoTray"
 )
 
 // Config holds the application configuration
