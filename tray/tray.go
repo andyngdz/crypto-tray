@@ -8,7 +8,7 @@ import (
 	"crypto-tray/providers"
 	"crypto-tray/services"
 
-	"github.com/getlantern/systray"
+	"fyne.io/systray"
 )
 
 // New creates a new tray manager with the initial symbols and number format
@@ -50,7 +50,6 @@ func (t *Manager) onReady() {
 	// Pre-allocate menu item slots
 	for range maxPriceSlots {
 		item := systray.AddMenuItem("", "Current price")
-		item.Disable()
 		item.Hide()
 		t.priceSlots = append(t.priceSlots, item)
 	}
@@ -138,12 +137,14 @@ func (t *Manager) UpdatePrices(data []*providers.PriceData, movements map[string
 			if price == 0 {
 				price = d.Price
 			}
-			indicator := movement.IndicatorNeutral
-			if dir, ok := movements[coinID]; ok {
-				indicator = dir.Indicator()
+
+			dir := movement.Neutral
+			if movementDir, ok := movements[coinID]; ok {
+				dir = movementDir
 			}
-			displayText := fmt.Sprintf("%s %s %s", indicator, d.Symbol, services.FormatPriceWithCurrency(price, t.numberFormat, d.Currency))
-			t.priceSlots[symbolIdx].SetTitle(displayText)
+
+			priceText := services.FormatPriceWithCurrency(price, t.numberFormat, d.Currency)
+			t.updatePriceSlot(t.priceSlots[symbolIdx], dir, d.Symbol, priceText)
 		}
 	}
 
