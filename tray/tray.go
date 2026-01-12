@@ -48,9 +48,10 @@ func (t *Manager) onReady() {
 	systray.SetTooltip("Crypto Tray - Loading...")
 
 	// Pre-allocate menu item slots
+	// Note: Items are NOT disabled to preserve icon colors on Windows
+	// (disabled items render icons in greyscale)
 	for range maxPriceSlots {
 		item := systray.AddMenuItem("", "Current price")
-		item.Disable()
 		item.Hide()
 		t.priceSlots = append(t.priceSlots, item)
 	}
@@ -138,12 +139,14 @@ func (t *Manager) UpdatePrices(data []*providers.PriceData, movements map[string
 			if price == 0 {
 				price = d.Price
 			}
-			indicator := movement.IndicatorNeutral
-			if dir, ok := movements[coinID]; ok {
-				indicator = dir.Indicator()
+
+			dir := movement.Neutral
+			if d, ok := movements[coinID]; ok {
+				dir = d
 			}
-			displayText := fmt.Sprintf("%s %s %s", indicator, d.Symbol, services.FormatPriceWithCurrency(price, t.numberFormat, d.Currency))
-			t.priceSlots[symbolIdx].SetTitle(displayText)
+
+			priceText := services.FormatPriceWithCurrency(price, t.numberFormat, d.Currency)
+			t.updatePriceSlot(t.priceSlots[symbolIdx], dir, d.Symbol, priceText)
 		}
 	}
 
