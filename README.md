@@ -37,6 +37,7 @@ This project uses `github.com/emersion/go-autostart` which requires CGO on Windo
 ### macOS
 
 Xcode command line tools (includes clang):
+
 ```bash
 xcode-select --install
 ```
