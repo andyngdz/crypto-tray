@@ -1,7 +1,7 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "Crypto Tray",
-  "outputfilename": "crypto-tray",
+  "name": "CryptoTray",
+  "outputfilename": "CryptoTray",
   "frontend:install": "pnpm install",
   "frontend:build": "pnpm run build",
   "frontend:dev:watcher": "pnpm run dev",
@@ -9,6 +9,10 @@
   "wailsjsdir": "./frontend/wailsjs",
   "bindings": {
     "tags": ["bindings"]
+  },
+  "info": {
+    "productName": "Crypto Tray",
+    "companyName": "Crypto Tray"
   },
   "author": {
     "name": "Andy D. Nguyen",

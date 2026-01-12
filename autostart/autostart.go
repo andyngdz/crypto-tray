@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	appName     = "crypto-tray"
+	appName     = "CryptoTray"
 	displayName = "Crypto Tray"
 )
 
