@@ -139,8 +139,8 @@ func (t *Manager) UpdatePrices(data []*providers.PriceData, movements map[string
 			}
 
 			dir := movement.Neutral
-			if d, ok := movements[coinID]; ok {
-				dir = d
+			if movementDir, ok := movements[coinID]; ok {
+				dir = movementDir
 			}
 
 			priceText := services.FormatPriceWithCurrency(price, t.numberFormat, d.Currency)
