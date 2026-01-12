@@ -1,7 +1,6 @@
 package tray
 
 import (
-	_ "embed"
 	"fmt"
 	"strings"
 
@@ -11,9 +10,6 @@ import (
 
 	"github.com/getlantern/systray"
 )
-
-//go:embed icon.png
-var iconData []byte
 
 // New creates a new tray manager with the initial symbols and number format
 func New(symbols []string, numberFormat string, onOpenSettings, onRefreshNow, onQuit func()) *Manager {
