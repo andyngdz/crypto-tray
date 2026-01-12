@@ -8,7 +8,7 @@ import (
 	"crypto-tray/providers"
 	"crypto-tray/services"
 
-	"github.com/getlantern/systray"
+	"fyne.io/systray"
 )
 
 // New creates a new tray manager with the initial symbols and number format

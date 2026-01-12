@@ -8,7 +8,7 @@ import (
 
 	"crypto-tray/movement"
 
-	"github.com/getlantern/systray"
+	"fyne.io/systray"
 )
 
 //go:embed up.ico
