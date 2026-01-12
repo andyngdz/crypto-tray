@@ -4,6 +4,7 @@ go 1.24.0
 
 require (
 	fyne.io/systray v1.11.0
+	github.com/emersion/go-autostart v0.0.0-20250403115856-34830d6457d2
 	github.com/imroc/req/v3 v3.57.0
 	github.com/wailsapp/wails/v2 v2.11.0
 	golang.org/x/text v0.32.0

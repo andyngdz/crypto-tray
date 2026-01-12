@@ -7,6 +7,7 @@ export namespace config {
 	    symbols: string[];
 	    number_format: string;
 	    display_currency: string;
+	    auto_start: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -20,6 +21,7 @@ export namespace config {
 	        this.symbols = source["symbols"];
 	        this.number_format = source["number_format"];
 	        this.display_currency = source["display_currency"];
+	        this.auto_start = source["auto_start"];
 	    }
 	}
 

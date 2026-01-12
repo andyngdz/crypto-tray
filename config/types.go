@@ -9,6 +9,7 @@ const (
 	DefaultProviderID      = "coingecko"
 	DefaultNumberFormat    = "us"
 	DefaultDisplayCurrency = "usd"
+	DefaultAutoStart       = true
 	configFileName         = "config.json"
 	appDirName             = "crypto-tray"
 )
@@ -21,6 +22,7 @@ type Config struct {
 	Symbols         []string          `json:"symbols"`
 	NumberFormat    string            `json:"number_format"`
 	DisplayCurrency string            `json:"display_currency"`
+	AutoStart       bool              `json:"auto_start"`
 }
 
 func defaultConfig() *Config {
@@ -31,5 +33,6 @@ func defaultConfig() *Config {
 		Symbols:         []string{DefaultSymbol},
 		NumberFormat:    DefaultNumberFormat,
 		DisplayCurrency: DefaultDisplayCurrency,
+		AutoStart:       DefaultAutoStart,
 	}
 }
