@@ -8,7 +8,7 @@ import (
 
 	"crypto-tray/movement"
 
-	"fyne.io/systray"
+	"crypto-tray/internal/systray"
 )
 
 //go:embed up.ico
