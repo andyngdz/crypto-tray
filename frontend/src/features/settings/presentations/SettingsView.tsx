@@ -1,6 +1,7 @@
 import { Alert, Box, Button } from '@mui/material'
 
 import { SettingsApiKey } from '@/features/settings/presentations/SettingsApiKey'
+import { SettingsAutoStart } from '@/features/settings/presentations/SettingsAutoStart'
 import { SettingsFiatCurrency } from '@/features/settings/presentations/SettingsFiatCurrency'
 import { SettingsNumberFormat } from '@/features/settings/presentations/SettingsNumberFormat'
 import { SettingsProvider } from '@/features/settings/presentations/SettingsProvider'
@@ -33,6 +34,10 @@ export function SettingsView() {
 
       <SettingsSection title="Formatting">
         <SettingsNumberFormat />
+      </SettingsSection>
+
+      <SettingsSection title="System">
+        <SettingsAutoStart />
       </SettingsSection>
 
       <Button

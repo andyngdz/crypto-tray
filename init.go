@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto-tray/autostart"
 	"crypto-tray/config"
 	"crypto-tray/providers"
 )
@@ -17,6 +18,12 @@ func InitApp() (*AppDependencies, error) {
 	configManager, err := config.NewManager()
 	if err != nil {
 		return nil, err
+	}
+
+	// Enable auto-start on first run if configured
+	cfg := configManager.Get()
+	if cfg.AutoStart && !autostart.IsEnabled() {
+		autostart.SetEnabled(true)
 	}
 
 	registry := providers.NewRegistry()
