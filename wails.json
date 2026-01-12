@@ -1,6 +1,6 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "crypto-tray",
+  "name": "Crypto Tray",
   "outputfilename": "crypto-tray",
   "frontend:install": "pnpm install",
   "frontend:build": "pnpm run build",

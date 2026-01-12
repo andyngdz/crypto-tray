@@ -25,12 +25,12 @@ func main() {
 	}
 
 	err = wails.Run(&options.App{
-		Title:  "CryptoTray",
+		Title:  "Crypto Tray",
 		Width:  500,
 		Height: 400,
 		Linux: &linux.Options{
 			Icon:        windowIcon,
-			ProgramName: "CryptoTray",
+			ProgramName: "Crypto Tray",
 		},
 		AssetServer: &assetserver.Options{
 			Assets: assets,
