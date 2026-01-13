@@ -291,6 +291,8 @@ jobs:
 
       - name: Build for Windows amd64
         run: task windows:build
+        env:
+          CGO_ENABLED: 1
 
       - name: Create NSIS installer
         run: task windows:package
