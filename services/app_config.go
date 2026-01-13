@@ -44,8 +44,20 @@ func (s *AppService) SaveConfig(cfg config.Config) error {
 }
 
 // GetAvailableProviders returns a list of available API providers
-func (s *AppService) GetAvailableProviders() []providers.Provider {
-	return s.registry.List()
+func (s *AppService) GetAvailableProviders() []providers.ProviderInfo {
+	providerList := s.registry.List()
+	result := make([]providers.ProviderInfo, len(providerList))
+
+	for providerIdx := range providerList {
+		p := providerList[providerIdx]
+		result[providerIdx] = providers.ProviderInfo{
+			ID:             p.ID(),
+			Name:           p.Name(),
+			RequiresAPIKey: p.RequiresAPIKey(),
+		}
+	}
+
+	return result
 }
 
 // GetAvailableSymbols returns a list of supported cryptocurrency symbols
