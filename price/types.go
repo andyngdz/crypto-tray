@@ -1,14 +1,12 @@
 package price
 
 import (
-	"context"
-
 	"crypto-tray/movement"
 	"crypto-tray/providers"
 )
 
-// Callback is called when price data is fetched
-type Callback func(data []*providers.PriceData, err error)
+// PriceHandler is called when price data is fetched
+type PriceHandler func(data []*providers.PriceData, err error)
 
 // TrayUpdater handles tray display updates
 type TrayUpdater interface {
@@ -19,11 +17,6 @@ type TrayUpdater interface {
 // PriceConverter handles currency conversion for price data
 type PriceConverter interface {
 	ConvertPrices(data []*providers.PriceData)
-}
-
-// ContextProvider provides Wails context for event emission
-type ContextProvider interface {
-	GetContext() context.Context
 }
 
 // MovementTracker tracks price movements between fetches

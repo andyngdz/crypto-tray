@@ -2,27 +2,19 @@ package exchange
 
 import (
 	"context"
-	"log"
 	"sync"
 	"time"
 
 	"crypto-tray/config"
-	"crypto-tray/services"
-)
-
-const (
-	primaryURL   = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies"
-	fallbackURL  = "https://latest.currency-api.pages.dev/v1/currencies"
-	baseCurrency = "usdt"
-	timeout      = 10 * time.Second
+	"crypto-tray/internal/httpclient"
 )
 
 // Fetcher periodically fetches exchange rates
 type Fetcher struct {
 	configManager  *config.Manager
-	callback       Callback
-	primaryClient  *services.HTTPClient
-	fallbackClient *services.HTTPClient
+	callback       RatesHandler
+	primaryClient  *httpclient.Client
+	fallbackClient *httpclient.Client
 
 	mu           sync.RWMutex
 	cancelFunc   context.CancelFunc
@@ -34,11 +26,11 @@ type Fetcher struct {
 func newFetcher(configManager *config.Manager) *Fetcher {
 	return &Fetcher{
 		configManager: configManager,
-		primaryClient: services.NewHTTPClient(services.HTTPClientConfig{
+		primaryClient: httpclient.New(httpclient.Config{
 			BaseURL: primaryURL,
 			Timeout: timeout,
 		}),
-		fallbackClient: services.NewHTTPClient(services.HTTPClientConfig{
+		fallbackClient: httpclient.New(httpclient.Config{
 			BaseURL: fallbackURL,
 			Timeout: timeout,
 		}),
@@ -47,7 +39,7 @@ func newFetcher(configManager *config.Manager) *Fetcher {
 }
 
 // Start begins the exchange rate fetching loop with the given callback
-func (f *Fetcher) Start(callback Callback) {
+func (f *Fetcher) Start(callback RatesHandler) {
 	f.mu.Lock()
 	f.callback = callback
 	f.mu.Unlock()
@@ -117,19 +109,11 @@ func (f *Fetcher) loop(ctx context.Context) {
 	}
 }
 
-// apiResponse represents the raw API response
-type apiResponse struct {
-	Date string             `json:"date"`
-	USDT map[string]float64 `json:"usdt"`
-}
-
 func (f *Fetcher) fetchOnce(ctx context.Context) {
 	rates, err := f.fetchFromClient(ctx, f.primaryClient)
 	if err != nil {
-		log.Printf("Primary exchange API failed: %v, trying fallback", err)
 		rates, err = f.fetchFromClient(ctx, f.fallbackClient)
 		if err != nil {
-			log.Printf("Fallback exchange API also failed: %v", err)
 			// Keep using cached rates
 			f.callback(f.GetRates(), nil)
 			return
@@ -144,8 +128,9 @@ func (f *Fetcher) fetchOnce(ctx context.Context) {
 	f.callback(rates, nil)
 }
 
-func (f *Fetcher) fetchFromClient(ctx context.Context, client *services.HTTPClient) (*ExchangeRates, error) {
-	var resp apiResponse
+func (f *Fetcher) fetchFromClient(ctx context.Context, client *httpclient.Client) (*ExchangeRates, error) {
+	var resp APIResponse
+
 	if err := client.Get(ctx, "/"+baseCurrency+".json", &resp); err != nil {
 		return nil, err
 	}

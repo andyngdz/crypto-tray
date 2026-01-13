@@ -1,13 +1,11 @@
-import type { PriceData } from '@/features/prices/types'
-import { isPriceData } from '@/features/prices/types'
-import { FetchPrices, RefreshPrices } from '@wailsjs/go/main/App'
+import { FetchPrices, RefreshPrices } from '@bindings/services/appservice'
+import { PriceData } from '@bindings/providers/models'
+
+export type { PriceData }
 
 export async function fetchPrices(symbols: string[]): Promise<PriceData[]> {
   const prices = await FetchPrices(symbols)
-  if (!Array.isArray(prices) || !prices.every(isPriceData)) {
-    throw new Error('Invalid prices response from backend')
-  }
-  return prices
+  return prices.filter((p): p is PriceData => !!p)
 }
 
 export function refreshPrices(): void {

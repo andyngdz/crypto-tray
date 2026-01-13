@@ -1,5 +1,12 @@
 package providers
 
+// ProviderInfo represents provider metadata for the frontend
+type ProviderInfo struct {
+	ID             string `json:"id"`
+	Name           string `json:"name"`
+	RequiresAPIKey bool   `json:"requiresApiKey"`
+}
+
 // PriceData represents cryptocurrency price information
 type PriceData struct {
 	CoinID         string  `json:"coinId"`
