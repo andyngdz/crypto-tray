@@ -1,12 +1,10 @@
 package price
 
 import (
-	"log"
-
-	"github.com/wailsapp/wails/v2/pkg/runtime"
-
 	"crypto-tray/config"
 	"crypto-tray/providers"
+
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 // Service orchestrates price fetching, conversion, tray updates, and event emission
@@ -14,7 +12,7 @@ type Service struct {
 	fetcher         *Fetcher
 	tray            TrayUpdater
 	converter       PriceConverter
-	contextProvider ContextProvider
+	app             *application.App
 	movementTracker MovementTracker
 }
 
@@ -24,7 +22,7 @@ func NewService(
 	configManager *config.Manager,
 	tray TrayUpdater,
 	converter PriceConverter,
-	contextProvider ContextProvider,
+	app *application.App,
 	movementTracker MovementTracker,
 ) *Service {
 	fetcher := newFetcher(registry, configManager)
@@ -33,7 +31,7 @@ func NewService(
 		fetcher:         fetcher,
 		tray:            tray,
 		converter:       converter,
-		contextProvider: contextProvider,
+		app:             app,
 		movementTracker: movementTracker,
 	}
 }
@@ -42,7 +40,6 @@ func NewService(
 func (s *Service) Start() {
 	s.fetcher.Start(func(data []*providers.PriceData, err error) {
 		if err != nil {
-			log.Printf("Error fetching price: %v", err)
 			s.tray.SetError(err.Error())
 			return
 		}
@@ -51,7 +48,7 @@ func (s *Service) Start() {
 			s.converter.ConvertPrices(data)
 			movements := s.movementTracker.Track(data)
 			s.tray.UpdatePrices(data, movements)
-			runtime.EventsEmit(s.contextProvider.GetContext(), "price:update", data)
+			s.app.Event.Emit("price:update", data)
 		}
 	})
 }

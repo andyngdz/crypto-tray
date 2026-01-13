@@ -1,7 +1,10 @@
 [Desktop Entry]
-Name=CryptoTray
-Exec=crypto-tray
-Icon=CryptoTray
 Type=Application
-Categories=Utility;Finance;
-StartupWMClass=CryptoTray
+Name=cryptotray
+Exec=CryptoTray
+Icon=CryptoTray
+Categories=Development;
+Terminal=false
+Keywords=wails
+Version=1.0
+StartupNotify=false

@@ -23,7 +23,6 @@ func NewConverter(fetcher *Fetcher, configManager *config.Manager) *Converter {
 func (c *Converter) ConvertPrices(data []*providers.PriceData) {
 	cfg := c.configManager.Get()
 	rates := c.fetcher.GetRates()
-
 	rate := 1.0
 	currency := cfg.DisplayCurrency
 
@@ -34,8 +33,7 @@ func (c *Converter) ConvertPrices(data []*providers.PriceData) {
 	}
 
 	for dataIdx := range data {
-		d := data[dataIdx]
-		d.ConvertedPrice = d.Price * rate
-		d.Currency = currency
+		data[dataIdx].ConvertedPrice = data[dataIdx].Price * rate
+		data[dataIdx].Currency = currency
 	}
 }

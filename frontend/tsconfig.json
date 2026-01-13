@@ -22,7 +22,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@wailsjs/*": ["./wailsjs/*"]
+      "@bindings/*": ["./bindings/crypto-tray/*"]
     }
   },
   "include": [
