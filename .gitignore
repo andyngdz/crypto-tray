@@ -1,3 +1,21 @@
+# Build outputs
 build/bin
+bin/
+build/linux/appimage/build
+
+# Dependencies
 node_modules
+
+# Frontend build
 frontend/dist
+frontend/bindings
+
+# Task checksums
+.task/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store

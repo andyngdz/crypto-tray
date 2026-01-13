@@ -6,34 +6,12 @@ import (
 	"sync"
 	"time"
 
-	"crypto-tray/services"
+	"crypto-tray/internal/httpclient"
 )
-
-// CoinGecko API constants
-const (
-	coingeckoBaseURL      = "https://api.coingecko.com/api/v3"
-	coingeckoCurrency     = "usd"
-	coingeckoAPIKeyHeader = "x-cg-demo-api-key"
-	coingeckoTimeout      = 10 * time.Second
-	coingeckoCacheTTL     = 24 * time.Hour
-)
-
-// coingeckoMarketCoin represents a coin from the CoinGecko /coins/markets API
-type coingeckoMarketCoin struct {
-	ID     string `json:"id"`
-	Symbol string `json:"symbol"`
-	Name   string `json:"name"`
-}
-
-// coingeckoPriceResponse represents the price API response
-type coingeckoPriceResponse map[string]struct {
-	USD         float64 `json:"usd"`
-	USDChange24 float64 `json:"usd_24h_change"`
-}
 
 // CoinGecko implements the Provider interface for the CoinGecko API
 type CoinGecko struct {
-	httpClient *services.HTTPClient
+	httpClient *httpclient.Client
 
 	// Symbol cache
 	cacheMu   sync.RWMutex
@@ -45,7 +23,7 @@ type CoinGecko struct {
 // NewCoinGecko creates a new CoinGecko provider
 func NewCoinGecko() *CoinGecko {
 	return &CoinGecko{
-		httpClient: services.NewHTTPClient(services.HTTPClientConfig{
+		httpClient: httpclient.New(httpclient.Config{
 			BaseURL:      coingeckoBaseURL,
 			Timeout:      coingeckoTimeout,
 			APIKeyHeader: coingeckoAPIKeyHeader,
@@ -68,13 +46,13 @@ func (c *CoinGecko) FetchPrices(ctx context.Context, coinIDs []string) ([]*Price
 		return []*PriceData{}, nil
 	}
 
-	query := map[string]string{
-		"ids":                 strings.Join(coinIDs, ","),
-		"vs_currencies":       coingeckoCurrency,
-		"include_24hr_change": "true",
+	query := CoinGeckoPriceQuery{
+		IDs:              strings.Join(coinIDs, ","),
+		VsCurrencies:     coingeckoCurrency,
+		Include24hChange: "true",
 	}
 
-	var result coingeckoPriceResponse
+	var result CoinGeckoPriceResponse
 	if err := c.httpClient.GetWithQuery(ctx, "/simple/price", query, &result); err != nil {
 		return nil, err
 	}
@@ -109,14 +87,14 @@ func (c *CoinGecko) FetchSymbols(ctx context.Context) ([]SymbolInfo, error) {
 	c.cacheMu.RUnlock()
 
 	// Fetch top 250 coins by market cap
-	query := map[string]string{
-		"vs_currency": coingeckoCurrency,
-		"order":       "market_cap_desc",
-		"per_page":    "250",
-		"page":        "1",
+	query := CoinGeckoMarketsQuery{
+		VsCurrency: coingeckoCurrency,
+		Order:      "market_cap_desc",
+		PerPage:    "250",
+		Page:       "1",
 	}
 
-	var coins []coingeckoMarketCoin
+	var coins []CoinGeckoMarketCoin
 	if err := c.httpClient.GetWithQuery(ctx, "/coins/markets", query, &coins); err != nil {
 		return []SymbolInfo{}, nil
 	}
@@ -154,5 +132,6 @@ func (c *CoinGecko) coinIDToSymbol(coinID string) string {
 	if info, ok := c.coinIDMap[coinID]; ok {
 		return info.Symbol
 	}
+
 	return strings.ToUpper(coinID)
 }

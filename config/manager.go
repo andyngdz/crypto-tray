@@ -81,8 +81,10 @@ func (m *Manager) Update(cfg Config) error {
 	if err := cfg.Validate(); err != nil {
 		return err
 	}
+
 	m.mu.Lock()
 	m.config = &cfg
 	m.mu.Unlock()
+
 	return m.Save()
 }

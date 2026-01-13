@@ -10,7 +10,6 @@ import (
 type AppDependencies struct {
 	ConfigManager *config.Manager
 	Registry      *providers.Registry
-	App           *App
 }
 
 // InitApp creates and initializes all application dependencies
@@ -30,11 +29,8 @@ func InitApp() (*AppDependencies, error) {
 	registry.Register(providers.NewCoinGecko())
 	registry.Register(providers.NewBinance())
 
-	app := NewApp(configManager, registry)
-
 	return &AppDependencies{
 		ConfigManager: configManager,
 		Registry:      registry,
-		App:           app,
 	}, nil
 }

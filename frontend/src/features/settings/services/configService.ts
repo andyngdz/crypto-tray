@@ -14,7 +14,7 @@ import {
   GetConfig,
   HideWindow,
   SaveConfig,
-} from '@wailsjs/go/main/App'
+} from '@bindings/services/appservice'
 
 /**
  * Fetches the current configuration from the Go backend

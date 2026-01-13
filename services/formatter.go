@@ -23,14 +23,17 @@ func GetCurrencySymbol(currencyCode string) string {
 // FormatPriceWithCurrency formats a price with the specified currency symbol
 func FormatPriceWithCurrency(price float64, format string, currency string) string {
 	var lang language.Tag
+
 	switch format {
 	case "european":
 		lang = language.German
 	default: // "us", "asian", or any other value
 		lang = language.English
 	}
+
 	p := message.NewPrinter(lang)
 	symbol := GetCurrencySymbol(currency)
+
 	return p.Sprintf("%s%.0f", symbol, price)
 }
 
@@ -40,9 +43,11 @@ func FormatTrayTitle(symbols []string, suffix string) string {
 	if len(symbols) == 0 {
 		return ""
 	}
+
 	parts := make([]string, len(symbols))
-	for i, symbol := range symbols {
-		parts[i] = fmt.Sprintf("%s %s", symbol, suffix)
+	for symbolIdx := range symbols {
+		parts[symbolIdx] = fmt.Sprintf("%s %s", symbols[symbolIdx], suffix)
 	}
+
 	return strings.Join(parts, " | ")
 }

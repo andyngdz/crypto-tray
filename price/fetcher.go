@@ -3,7 +3,6 @@ package price
 import (
 	"context"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 
@@ -15,7 +14,7 @@ import (
 type Fetcher struct {
 	registry      *providers.Registry
 	configManager *config.Manager
-	callback      Callback
+	callback      PriceHandler
 
 	mu         sync.Mutex
 	cancelFunc context.CancelFunc
@@ -34,8 +33,8 @@ func newFetcher(
 	}
 }
 
-// Start begins the price fetching loop with the given callback
-func (f *Fetcher) Start(callback Callback) {
+// Start begins the price fetching loop with the given handler
+func (f *Fetcher) Start(callback PriceHandler) {
 	f.mu.Lock()
 	f.callback = callback
 	f.mu.Unlock()
@@ -98,7 +97,6 @@ func (f *Fetcher) loop(ctx context.Context) {
 func (f *Fetcher) fetchOnce(ctx context.Context, cfg config.Config) {
 	provider, ok := f.registry.Get(cfg.ProviderID)
 	if !ok {
-		log.Printf("Unknown provider: %s", cfg.ProviderID)
 		f.callback(nil, fmt.Errorf("unknown provider: %s", cfg.ProviderID))
 		return
 	}

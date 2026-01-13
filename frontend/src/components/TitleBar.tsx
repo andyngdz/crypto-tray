@@ -1,5 +1,5 @@
 import { Box, IconButton } from '@mui/material'
-import { WindowMinimise, WindowToggleMaximise } from '@wailsjs/runtime/runtime'
+import { Window } from '@wailsio/runtime'
 import { Minus, Square, X } from 'lucide-react'
 
 import { hideWindow } from '@/features/settings/services/configService'
@@ -19,7 +19,7 @@ export function TitleBar() {
     >
       <IconButton
         size="small"
-        onClick={WindowMinimise}
+        onClick={() => Window.Minimise()}
         sx={{
           '--wails-draggable': 'no-drag',
           color: 'text.secondary',
@@ -30,7 +30,7 @@ export function TitleBar() {
       </IconButton>
       <IconButton
         size="small"
-        onClick={WindowToggleMaximise}
+        onClick={() => Window.ToggleMaximise()}
         sx={{
           '--wails-draggable': 'no-drag',
           color: 'text.secondary',

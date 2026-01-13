@@ -1,10 +1,10 @@
 import {
   fetchPrices,
   refreshPrices,
+  type PriceData,
 } from '@/features/prices/services/priceService'
-import type { PriceData } from '@/features/prices/types'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { EventsOff, EventsOn } from '@wailsjs/runtime/runtime'
+import { Events } from '@wailsio/runtime'
 import { useCallback, useEffect, useMemo } from 'react'
 
 interface UsePricesOptions {
@@ -41,8 +41,10 @@ export function usePrices({ symbols, enabled = true }: UsePricesOptions) {
   }, [query.data])
 
   useEffect(() => {
-    EventsOn('price:update', handlePriceUpdate)
-    return () => EventsOff('price:update')
+    const off = Events.On('price:update', (event) => {
+      handlePriceUpdate(event.data as PriceData[])
+    })
+    return off
   }, [handlePriceUpdate])
 
   return {

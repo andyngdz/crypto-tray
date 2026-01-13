@@ -1,29 +1,27 @@
 package exchange
 
 import (
-	"log"
-
-	"github.com/wailsapp/wails/v2/pkg/runtime"
-
 	"crypto-tray/config"
+
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 // Service orchestrates exchange rate fetching, conversion, and event emission
 type Service struct {
-	fetcher         *Fetcher
-	converter       *Converter
-	contextProvider ContextProvider
+	fetcher   *Fetcher
+	converter *Converter
+	app       *application.App
 }
 
 // NewService creates a new exchange service
-func NewService(configManager *config.Manager, contextProvider ContextProvider) *Service {
+func NewService(configManager *config.Manager, app *application.App) *Service {
 	fetcher := newFetcher(configManager)
 	converter := NewConverter(fetcher, configManager)
 
 	return &Service{
-		fetcher:         fetcher,
-		converter:       converter,
-		contextProvider: contextProvider,
+		fetcher:   fetcher,
+		converter: converter,
+		app:       app,
 	}
 }
 
@@ -31,11 +29,10 @@ func NewService(configManager *config.Manager, contextProvider ContextProvider) 
 func (s *Service) Start() {
 	s.fetcher.Start(func(rates *ExchangeRates, err error) {
 		if err != nil {
-			log.Printf("Error fetching exchange rates: %v", err)
 			return
 		}
 
-		runtime.EventsEmit(s.contextProvider.GetContext(), "exchange:update", rates)
+		s.app.Event.Emit("exchange:update", rates.Rates)
 	})
 }
 
