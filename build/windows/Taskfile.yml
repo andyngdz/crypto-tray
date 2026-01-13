@@ -35,10 +35,10 @@ tasks:
     dir: build/windows/nsis
     cmds:
       - wails3 generate webview2bootstrapper -dir "{{.ROOT_DIR}}/build/windows/nsis"
-      - makensis -DARG_WAILS_{{.ARG_FLAG}}_BINARY="{{.ROOT_DIR}}/{{.BIN_DIR}}/{{.APP_NAME}}.exe" project.nsi
-    vars:
-      ARCH: '{{.ARCH | default ARCH}}'
-      ARG_FLAG: '{{if eq .ARCH "amd64"}}AMD64{{else}}ARM64{{end}}'
+      - cmd: makensis -DARG_WAILS_AMD64_BINARY="{{.ROOT_DIR}}\{{.BIN_DIR}}\{{.APP_NAME}}.exe" project.nsi
+        platforms: [windows]
+      - cmd: makensis -DARG_WAILS_AMD64_BINARY="{{.ROOT_DIR}}/{{.BIN_DIR}}/{{.APP_NAME}}.exe" project.nsi
+        platforms: [linux, darwin]
 
   run:
     cmds:
