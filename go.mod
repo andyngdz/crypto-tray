@@ -54,8 +54,3 @@ require (
 	golang.org/x/sys v0.39.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
-
-// Use local Wails fork with XAyatanaLabel support for Linux systray labels
-replace github.com/wailsapp/wails/v3 => ../wails-fork/v3
-
-// Indirect dependencies will be managed by go mod tidy
