@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=CryptoTray
 Exec=crypto-tray
-Icon=crypto-tray
+Icon=CryptoTray
 Type=Application
 Categories=Utility;Finance;
 StartupWMClass=CryptoTray
