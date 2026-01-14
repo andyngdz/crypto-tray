@@ -5,66 +5,49 @@ A lightweight cryptocurrency price tracker that lives in your system tray.
 ## Features
 
 - Real-time cryptocurrency price updates in system tray
-- Support for multiple crypto providers (CoinGecko, Binance)
+- Support for multiple crypto providers
 - Customizable refresh intervals
 - Multiple fiat currency support
-- Start on system startup (enabled by default)
+- Start on system startup
 - Cross-platform: Windows, macOS, Linux
-
-## Screenshots
-
-Coming soon.
 
 ## Requirements
 
-- Go 1.24+
 - Node.js 20+
 - pnpm 9+
-- Wails v2.11+
+- Rust toolchain (stable)
 
-### Windows (CGO requirement)
+### Linux system deps
 
-This project uses `github.com/emersion/go-autostart` which requires CGO on Windows.
-
-1. Install MSYS2 from https://www.msys2.org/
-2. Open "MSYS2 MINGW64" terminal and run:
-   ```bash
-   pacman -S mingw-w64-x86_64-gcc
-   ```
-3. Add to your system PATH: `C:\msys64\mingw64\bin`
-4. Set environment variable: `CGO_ENABLED=1`
-
-### macOS
-
-Xcode command line tools (includes clang):
+On Ubuntu/Debian:
 
 ```bash
-xcode-select --install
-```
-
-### Linux
-
-```bash
-sudo apt-get install build-essential libgtk-3-dev libwebkit2gtk-4.1-dev
+sudo apt-get install -y \
+  libgtk-3-dev \
+  libwebkit2gtk-4.1-dev \
+  libayatana-appindicator3-dev \
+  librsvg2-dev \
+  build-essential \
+  pkg-config
 ```
 
 ## Development
 
 ```bash
-# Install Wails CLI
-go install github.com/wailsapp/wails/v2/cmd/wails@latest
+pnpm install
+pnpm tauri dev
+```
 
-# Install frontend dependencies
-cd frontend && pnpm install && cd ..
+For quick UI iteration (frontend only):
 
-# Run in development mode
-wails dev
+```bash
+pnpm dev
 ```
 
 ## Building
 
 ```bash
-wails build
+pnpm tauri build
 ```
 
 ## License

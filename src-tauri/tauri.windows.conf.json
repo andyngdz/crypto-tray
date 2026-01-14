@@ -1,0 +1,18 @@
+{
+  "app": {
+    "windows": [
+      {
+        "title": "Crypto Tray",
+        "label": "main",
+        "width": 640,
+        "height": 800,
+        "minWidth": 640,
+        "minHeight": 600,
+        "center": true,
+        "decorations": false,
+        "visible": false,
+        "skipTaskbar": true
+      }
+    ]
+  }
+}

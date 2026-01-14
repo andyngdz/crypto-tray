@@ -1,0 +1,32 @@
+@import 'tailwindcss';
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+#root {
+  min-height: 100vh;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Enable Tauri window drag region */
+*[data-tauri-drag-region] {
+  -webkit-app-region: drag;
+  app-region: drag;
+  cursor: grab;
+}
+
+*[data-tauri-drag-region]:active {
+  cursor: grabbing;
+}
+
+/* Prevent buttons from being draggable */
+*[data-tauri-drag-region] button {
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
