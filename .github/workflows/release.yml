@@ -94,6 +94,7 @@ jobs:
             pkg-config \
             patchelf \
             libfuse2 \
+            xdg-utils \
             rpm
 
       - name: Install dependencies
@@ -102,11 +103,21 @@ jobs:
       - name: Build Tauri app
         run: pnpm tauri build ${{ matrix.tauriArgs }}
 
-      - name: Upload build artifacts
+      - name: Upload build artifacts (host)
+        if: matrix.rustTargets == ''
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
           path: src-tauri/target/release/bundle/**
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload build artifacts (target)
+        if: matrix.rustTargets != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**
           if-no-files-found: error
           retention-days: 1
 
