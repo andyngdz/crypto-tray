@@ -6,9 +6,6 @@ pub enum Error {
     #[error("Configuration error: {0}")]
     Config(String),
 
-    #[error("Network error: {0}")]
-    Network(String),
-
     #[error("Provider error: {0}")]
     Provider(String),
 

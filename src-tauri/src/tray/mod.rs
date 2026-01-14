@@ -7,6 +7,8 @@ use tauri::{
 };
 use tokio::sync::{Mutex, RwLock};
 
+mod icon;
+
 use crate::config::ConfigManager;
 use crate::error::Result;
 use crate::movement::Direction;
@@ -92,7 +94,7 @@ impl TrayState {
             if let Err(e) = tray.set_title(Some(&title)) {
                 eprintln!("Failed to set tray title: {}", e);
             }
-            if let Err(e) = tray.set_tooltip(Some("CryptoTray - Loading...")) {
+            if let Err(e) = tray.set_tooltip(Some("Crypto Tray - Loading...")) {
                 eprintln!("Failed to set tray tooltip: {}", e);
             }
         }
@@ -222,11 +224,13 @@ pub fn setup_tray(
         .collect();
     let initial_title = format_tray_title(&display_symbols, "$--,---");
 
+    let tray_icon = icon::tray_icon(app)?;
+
     let tray_builder = TrayIconBuilder::with_id("main")
-        .icon(app.default_window_icon().unwrap().clone())
+        .icon(tray_icon)
         .menu(&menu)
         .title(&initial_title)
-        .tooltip("CryptoTray - Loading...")
+        .tooltip("Crypto Tray - Loading...")
         .show_menu_on_left_click(false);
 
     #[cfg(target_os = "macos")]
