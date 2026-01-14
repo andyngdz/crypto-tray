@@ -1,21 +1,31 @@
-# Build outputs
-build/bin
-bin/
-build/linux/appimage/build
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # Dependencies
-node_modules
+node_modules/
 
 # Frontend build
-frontend/dist
-frontend/bindings
+/dist/
+/dist-ssr/
+*.local
 
-# Task checksums
-.task/
+# Rust/Cargo
+/target/
+/src-tauri/target/
+
+# Tauri generated
+/src-tauri/gen/schemas
 
 # IDE
 .idea/
-.vscode/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
 
 # OS
 .DS_Store

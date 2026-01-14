@@ -23,56 +23,46 @@ This file provides guidance to AI assistants when working with code in this repo
 
 ## Project Overview
 
-crypto-tray is a desktop application built with Wails v2 - a Go + React/TypeScript framework for cross-platform desktop apps. Currently based on the Wails React-TypeScript template.
+crypto-tray is a desktop application built with Tauri v2 (Rust) + React/TypeScript (Vite).
 
 ## Development Commands
 
 ```bash
-# Run in development mode with hot reload
-wails dev
+# Install dependencies
+pnpm install
 
-# Build production binary
-wails build
+# Run frontend dev server (for quick UI iteration)
+pnpm dev
 
-# Frontend-only commands (from frontend/ directory)
-npm install     # Install dependencies
-npm run dev     # Vite dev server
-npm run build   # Build frontend assets
-```
+# Run full Tauri app in dev mode
+pnpm tauri dev
 
-### Ubuntu
-
-On Ubuntu, use the `-tags webkit2_41` flag for webkit2gtk 4.1 compatibility:
-
-```bash
-wails dev -tags webkit2_41
-wails build -tags webkit2_41
+# Build production app bundles
+pnpm tauri build
 ```
 
 ## Architecture
 
-**Backend (Go)**
-
-- `main.go` - Wails app initialization, window configuration, frontend asset embedding
-- `app.go` - App struct with lifecycle hooks and methods exposed to frontend
-
 **Frontend (React/TypeScript)**
 
-- `frontend/src/main.tsx` - React entry point
-- `frontend/src/App.tsx` - Main application component
-- `frontend/wailsjs/` - Auto-generated Wails bindings (do not edit manually)
+- `src/main.tsx` - React entry point
+- `src/App.tsx` - Main application component
+
+**Backend (Rust / Tauri)**
+
+- `src-tauri/src/main.rs` - Tauri app entry point
+- `src-tauri/tauri.conf.json` - Tauri configuration
 
 **IPC Bridge**
 
-- Go methods on the `App` struct with public (capitalized) names are automatically exposed to frontend
-- Wails generates TypeScript bindings in `frontend/wailsjs/go/main/App.js`
-- Frontend imports and calls Go methods directly: `import { Greet } from '../wailsjs/go/main/App'`
+- Frontend calls Rust commands via `@tauri-apps/api` (e.g. `invoke`)
+- Rust exposes commands via `#[tauri::command]`
 
 ## Build Output
 
-- `build/bin/` - Compiled binaries
-- `build/darwin/` - macOS build configuration (Info.plist)
-- `build/windows/` - Windows build configuration (manifests, installer, icons)
+- `dist/` - Frontend build output (Vite)
+- `src-tauri/target/` - Rust build artifacts (Cargo)
+- `src-tauri/target/release/bundle/` - Packaged application bundles
 
 ## Code Style
 
@@ -88,11 +78,6 @@ wails build -tags webkit2_41
 - Add blank lines between code blocks for readability
 - Follow existing patterns in the codebase - check how similar code is written before adding new code
 - Only add defensive code (nil checks, empty checks, fallbacks) when necessary - trace the data flow to verify the check is actually needed
-
-**Go**
-
-- Avoid `for _, item := range` on slices/arrays - use `for idx := range` and access `arr[idx]` instead (exception: maps don't have meaningful indices, so `for _, value := range` is acceptable)
-- Use meaningful index names instead of `i` (e.g., `symbolIdx`, `slotIdx`, `coinIdx`)
 
 **Frontend**
 
