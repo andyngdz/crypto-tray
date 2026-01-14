@@ -41,16 +41,30 @@ jobs:
         include:
           - name: linux-amd64
             runner: ubuntu-latest
+            rustTargets: ""
+            tauriArgs: ""
           - name: linux-arm64
             runner: ubuntu-24.04-arm
-          - name: macos
+            rustTargets: ""
+            tauriArgs: ""
+          - name: macos-arm64
             runner: macos-latest
+            rustTargets: aarch64-apple-darwin
+            tauriArgs: "--target aarch64-apple-darwin"
+          - name: macos-x64
+            runner: macos-latest
+            rustTargets: x86_64-apple-darwin
+            tauriArgs: "--target x86_64-apple-darwin"
           - name: windows
             runner: windows-latest
+            rustTargets: ""
+            tauriArgs: ""
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -64,6 +78,8 @@ jobs:
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rustTargets }}
 
       - name: Install Linux dependencies
         if: runner.os == 'Linux'
@@ -75,13 +91,16 @@ jobs:
             libayatana-appindicator3-dev \
             librsvg2-dev \
             build-essential \
-            pkg-config
+            pkg-config \
+            patchelf \
+            libfuse2 \
+            rpm
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Build Tauri app
-        run: pnpm tauri build
+        run: pnpm tauri build ${{ matrix.tauriArgs }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

@@ -24,16 +24,17 @@ struct ShutdownSignals {
 
 // Config commands
 #[tauri::command]
-fn get_config(config_manager: State<'_, Arc<ConfigManager>>) -> Result<Config> {
+fn get_config<'state>(config_manager: State<'state, Arc<ConfigManager>>) -> Result<Config> {
     Ok(config_manager.get())
 }
 
 #[tauri::command]
-async fn save_config(
+async fn save_config<'state>(
     mut config: Config,
-    config_manager: State<'_, Arc<ConfigManager>>,
-    registry: State<'_, Arc<ProviderRegistry>>,
-    price_service: State<'_, Mutex<Option<PriceService>>>,
+    config_manager: State<'state, Arc<ConfigManager>>,
+    registry: State<'state, Arc<ProviderRegistry>>,
+    fetcher: State<'state, Arc<Fetcher>>,
+    price_service: State<'state, Mutex<Option<PriceService>>>,
 ) -> Result<()> {
     // Handle autostart change
     let current_config = config_manager.get();
@@ -47,7 +48,15 @@ async fn save_config(
         config.symbols = registry.get_default_coin_ids(&config.provider_id).await?;
     }
 
+    if let Some(key) = config.api_keys.get(&config.provider_id).filter(|k| !k.is_empty()) {
+        registry
+            .set_api_key(&config.provider_id, key.clone())
+            .await?;
+    }
+
     config_manager.save(config)?;
+
+    fetcher.refresh_now().await;
 
     // Trigger refresh to apply changes immediately
     if let Some(service) = price_service.lock().await.as_ref() {
@@ -59,14 +68,16 @@ async fn save_config(
 
 // Provider commands
 #[tauri::command]
-fn get_available_providers(registry: State<'_, Arc<ProviderRegistry>>) -> Vec<ProviderInfo> {
+fn get_available_providers<'state>(
+    registry: State<'state, Arc<ProviderRegistry>>,
+) -> Vec<ProviderInfo> {
     registry.list()
 }
 
 #[tauri::command]
-async fn get_available_symbols(
-    config_manager: State<'_, Arc<ConfigManager>>,
-    registry: State<'_, Arc<ProviderRegistry>>,
+async fn get_available_symbols<'state>(
+    config_manager: State<'state, Arc<ConfigManager>>,
+    registry: State<'state, Arc<ProviderRegistry>>,
 ) -> Result<Vec<SymbolInfo>> {
     let config = config_manager.get();
     registry.get_symbols(&config.provider_id).await
@@ -74,20 +85,26 @@ async fn get_available_symbols(
 
 // Price commands
 #[tauri::command]
-async fn fetch_prices(
+async fn fetch_prices<'state>(
     symbols: Vec<String>,
-    config_manager: State<'_, Arc<ConfigManager>>,
-    registry: State<'_, Arc<ProviderRegistry>>,
+    config_manager: State<'state, Arc<ConfigManager>>,
+    registry: State<'state, Arc<ProviderRegistry>>,
 ) -> Result<Vec<PriceData>> {
     let config = config_manager.get();
     registry.fetch_prices(&config.provider_id, &symbols).await
 }
 
 #[tauri::command]
-async fn refresh_prices(price_service: State<'_, Mutex<Option<PriceService>>>) -> Result<()> {
+async fn refresh_prices<'state>(
+    fetcher: State<'state, Arc<Fetcher>>,
+    price_service: State<'state, Mutex<Option<PriceService>>>,
+) -> Result<()> {
+    fetcher.refresh_now().await;
+
     if let Some(service) = price_service.lock().await.as_ref() {
         service.trigger_refresh().await;
     }
+
     Ok(())
 }
 
@@ -145,6 +162,8 @@ pub fn run() {
                 config_manager_clone.clone(),
                 exchange_shutdown_rx.clone(),
             ));
+            app.manage(fetcher.clone());
+
             let converter = Arc::new(Converter::new(fetcher, config_manager_clone.clone()));
             let price_service = PriceService::new(
                 app.handle().clone(),

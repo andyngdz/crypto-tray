@@ -124,7 +124,7 @@ impl Fetcher {
     async fn emit_rates(app: &AppHandle<Wry>, current_rates: &Arc<RwLock<Option<ExchangeRates>>>) {
         let rates = current_rates.read().await;
         if let Some(ref rates) = *rates {
-            if let Err(e) = app.emit("exchange:update", &rates.rates) {
+            if let Err(e) = app.emit("exchange:update", rates) {
                 eprintln!("Failed to emit exchange update: {}", e);
             }
         }

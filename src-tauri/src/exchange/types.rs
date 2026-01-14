@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::Duration;
 
@@ -8,7 +8,7 @@ pub const FALLBACK_URL: &str = "https://latest.currency-api.pages.dev/v1/currenc
 pub const BASE_CURRENCY: &str = "usdt";
 pub const TIMEOUT: Duration = Duration::from_secs(10);
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct ExchangeRates {
     pub date: String,
     pub base: String,
