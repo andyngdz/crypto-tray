@@ -14,6 +14,10 @@ node_modules/
 /dist-ssr/
 *.local
 
+# Local dev artifacts
+/build/
+/frontend/
+
 # Rust/Cargo
 /target/
 /src-tauri/target/
