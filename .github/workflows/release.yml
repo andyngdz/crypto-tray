@@ -117,7 +117,6 @@ jobs:
             src-tauri/target/release/bundle/**/*.msi
             src-tauri/target/release/bundle/**/*.exe
             src-tauri/target/release/bundle/**/*.zip
-            src-tauri/target/release/bundle/**/*.tar.gz
             src-tauri/target/release/bundle/**/*.sig
             src-tauri/target/release/bundle/**/*.blockmap
           if-no-files-found: error
@@ -137,7 +136,6 @@ jobs:
             src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**/*.msi
             src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**/*.exe
             src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**/*.zip
-            src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**/*.tar.gz
             src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**/*.sig
             src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**/*.blockmap
           if-no-files-found: error
@@ -174,7 +172,6 @@ jobs:
             artifacts/**/*.msi
             artifacts/**/*.exe
             artifacts/**/*.zip
-            artifacts/**/*.tar.gz
             artifacts/**/*.sig
             artifacts/**/*.blockmap
             artifacts/checksums.txt
