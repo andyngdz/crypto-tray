@@ -108,7 +108,18 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
-          path: src-tauri/target/release/bundle/**
+          path: |
+            src-tauri/target/release/bundle/**/*.dmg
+            src-tauri/target/release/bundle/**/*.pkg
+            src-tauri/target/release/bundle/**/*.AppImage
+            src-tauri/target/release/bundle/**/*.deb
+            src-tauri/target/release/bundle/**/*.rpm
+            src-tauri/target/release/bundle/**/*.msi
+            src-tauri/target/release/bundle/**/*.exe
+            src-tauri/target/release/bundle/**/*.zip
+            src-tauri/target/release/bundle/**/*.tar.gz
+            src-tauri/target/release/bundle/**/*.sig
+            src-tauri/target/release/bundle/**/*.blockmap
           if-no-files-found: error
           retention-days: 1
 
@@ -117,7 +128,18 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.name }}
-          path: src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**
+          path: |
+            src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**/*.dmg
+            src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**/*.pkg
+            src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**/*.AppImage
+            src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**/*.deb
+            src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**/*.rpm
+            src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**/*.msi
+            src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**/*.exe
+            src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**/*.zip
+            src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**/*.tar.gz
+            src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**/*.sig
+            src-tauri/target/${{ matrix.rustTargets }}/release/bundle/**/*.blockmap
           if-no-files-found: error
           retention-days: 1
 
@@ -133,7 +155,7 @@ jobs:
       - name: Generate checksums
         run: |
           cd artifacts
-          find . -type f -print0 | sort -z | xargs -0 sha256sum > checksums.txt
+          find . -type f ! -name checksums.txt -print0 | sort -z | xargs -0 sha256sum > checksums.txt
 
       - name: Upload assets to GitHub Release
         uses: softprops/action-gh-release@v2
@@ -144,5 +166,15 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            artifacts/**
+            artifacts/**/*.dmg
+            artifacts/**/*.pkg
+            artifacts/**/*.AppImage
+            artifacts/**/*.deb
+            artifacts/**/*.rpm
+            artifacts/**/*.msi
+            artifacts/**/*.exe
+            artifacts/**/*.zip
+            artifacts/**/*.tar.gz
+            artifacts/**/*.sig
+            artifacts/**/*.blockmap
             artifacts/checksums.txt
