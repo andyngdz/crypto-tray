@@ -2,6 +2,14 @@
 
 A lightweight cryptocurrency price tracker that lives in your system tray.
 
+## Screenshot
+
+<img src="screenshots/macos_screenshot.jpg" alt="CryptoTray on macOS" width="900" />
+
+> Note: System tray / menu bar behavior differs by OS and desktop environment.
+> Some platforms may truncate or not show the dynamic title text next to the icon.
+> If you don’t see prices in the tray, hover for the tooltip and use the tray menu items instead.
+
 ## Features
 
 - Real-time cryptocurrency price updates in system tray
@@ -10,6 +18,23 @@ A lightweight cryptocurrency price tracker that lives in your system tray.
 - Multiple fiat currency support
 - Start on system startup
 - Cross-platform: Windows, macOS, Linux
+
+## Providers
+
+Currently supported providers:
+- `Binance` (USDT pairs)
+- `CoinGecko` (coin IDs; optional demo API key supported)
+
+## Usage
+
+- Launch the app, then use the tray icon menu:
+  - `Open Settings` to configure provider, symbols, refresh interval, display currency, and autostart
+  - `Refresh Now` to fetch the latest prices immediately
+- Defaults:
+  - Provider: `Binance`
+  - Symbols: `BTCUSDT`, `ETHUSDT`, `SOLUSDT`
+  - Refresh: `15s`
+  - Display currency: `USD`
 
 ## Requirements
 
