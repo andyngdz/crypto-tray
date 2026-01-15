@@ -35,6 +35,8 @@ jobs:
 
   build:
     needs: [get-version]
+    env:
+      APP_VERSION: "${{ needs.get-version.outputs.version }}"
     strategy:
       fail-fast: false
       matrix:
@@ -100,8 +102,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Generate Tauri CI config
+        run: |
+          node -e "require('fs').writeFileSync('src-tauri/tauri.ci.conf.json', JSON.stringify({ version: process.env.APP_VERSION }))"
+
       - name: Build Tauri app
-        run: pnpm tauri build ${{ matrix.tauriArgs }}
+        run: pnpm tauri build --config src-tauri/tauri.ci.conf.json ${{ matrix.tauriArgs }}
 
       - name: Upload build artifacts (host)
         if: matrix.rustTargets == ''
