@@ -58,6 +58,7 @@ impl Provider for CoinGeckoProvider {
             "bitcoin".to_string(),
             "ethereum".to_string(),
             "solana".to_string(),
+            "monero".to_string(),
         ]
     }
 
